@@ -22,6 +22,7 @@ function ControlPanel({
   onResetTraining,
   onRequestHint,
   onUndoLastMovePair,
+  mode,
   isEngineThinking,
   isEngineMoveScheduled,
   isMobileLayout
@@ -92,7 +93,7 @@ function ControlPanel({
           <button
             className="app-button danger"
             onClick={onUndoLastMovePair}
-            disabled={isEngineThinking || isEngineMoveScheduled}
+            disabled={mode === "opening" || isEngineThinking || isEngineMoveScheduled}
           >
             {t("control.undoMove")}
           </button>

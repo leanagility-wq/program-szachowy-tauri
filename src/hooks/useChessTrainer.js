@@ -504,48 +504,6 @@ export function useChessTrainer() {
     engine.handleGetBestMove();
   }
 
-  function undoOpeningTrainingMove() {
-    clearAllAsyncWork();
-
-    const historyLength = gameRef.current.history().length;
-    if (historyLength === 0) {
-      setStatus(t("engine.noMovesToUndo"));
-      return;
-    }
-
-    const wasPlayerTurn = isPlayerTurnInOpening(moveIndex, playerColor);
-
-    gameRef.current.undo();
-    let undoneMoves = 1;
-
-    if (wasPlayerTurn && gameRef.current.history().length > 0) {
-      gameRef.current.undo();
-      undoneMoves += 1;
-    }
-
-    const nextMoveIndex = Math.max(0, moveIndex - undoneMoves);
-
-    setFen(gameRef.current.fen());
-    setMoveIndex(nextMoveIndex);
-    setHint("");
-    setShowHint(false);
-    setBestMoves([]);
-    setBestMove("");
-    engine.refreshEvaluation(gameRef.current.fen());
-
-    if (openingMoves[nextMoveIndex]) {
-      if (isPlayerTurnInOpening(nextMoveIndex, playerColor)) {
-        setHint(openingMoves[nextMoveIndex] || "");
-      } else {
-        scheduleOpeningComputerMove(() => {
-          openingTraining.playOpeningComputerMove(nextMoveIndex, openingMoves);
-        }, 300);
-      }
-    }
-
-    setStatus(t("engine.undoSuccess"));
-  }
-
   const displayedOpeningName = mode === "free" ? freeOpeningLabel : openingName;
   const displayedCorrectCount = mode === "free" ? freeGoodCount : correctCount;
   const displayedWrongCount = mode === "free" ? freeWrongCount : wrongCount;
@@ -633,9 +591,6 @@ export function useChessTrainer() {
     startFreeTraining,
     resetTraining,
     handleRequestHint,
-    undoLastMovePair:
-      mode === "opening"
-        ? undoOpeningTrainingMove
-        : () => engine.undoLastMovePair(mode, isEngineThinking)
+    undoLastMovePair: () => engine.undoLastMovePair(mode, isEngineThinking)
   };
 }
