@@ -141,6 +141,8 @@ function App() {
               isEngineThinking={trainer.isEngineThinking}
               isEngineMoveScheduled={trainer.isEngineMoveScheduled}
               evaluation={trainer.evaluation}
+              selectedSquare={trainer.selectedSquare}
+              legalTargetSquares={trainer.legalTargetSquares}
               chessboardOptions={trainer.chessboardOptions}
               isMobileLayout={isMobileLayout}
             />

@@ -23,6 +23,8 @@ function ChessBoardPanel({
   isEngineThinking,
   isEngineMoveScheduled,
   evaluation,
+  selectedSquare,
+  legalTargetSquares,
   chessboardOptions,
   isMobileLayout
 }) {
@@ -31,13 +33,25 @@ function ChessBoardPanel({
   const [boardWidth, setBoardWidth] = useState(480);
   const boardWrapRef = useRef(null);
 
+  function getMobileSquareStateClass(square) {
+    if (square === selectedSquare) {
+      return "mobile-square-click-target is-selected";
+    }
+
+    if (legalTargetSquares.includes(square)) {
+      return "mobile-square-click-target is-legal-target";
+    }
+
+    return "mobile-square-click-target";
+  }
+
   function renderMobileSquare({ square, piece, children }) {
     return (
       <div className="mobile-square-click-target-wrap">
         {children}
         <button
           type="button"
-          className="mobile-square-click-target"
+          className={getMobileSquareStateClass(square)}
           aria-label={`square-${square}`}
           onClick={(event) => {
             event.preventDefault();

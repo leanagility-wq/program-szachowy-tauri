@@ -418,7 +418,6 @@ export function useChessTrainer() {
     position: fen,
     boardWidth: 400,
     boardOrientation: playerColor,
-    arePiecesDraggable: true,
     arrows: boardArrows,
     customSquareStyles,
     alphaNotationStyle: {
@@ -571,6 +570,8 @@ export function useChessTrainer() {
     isEngineThinking,
     isEngineMoveScheduled: engine.isEngineMoveScheduled,
     evaluation,
+    selectedSquare,
+    legalTargetSquares,
     chessboardOptions,
     openingName: displayedOpeningName,
     moveIndex,
