@@ -16,6 +16,11 @@ val tauriProperties = Properties().apply {
 android {
     compileSdk = 36
     namespace = "pl.slowo.trenerszachowy"
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("../../../android-jniLibs")
+        }
+    }
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
         applicationId = "pl.slowo.trenerszachowy"
