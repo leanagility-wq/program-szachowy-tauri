@@ -28,7 +28,7 @@ export function useChessTrainer() {
   const needsResumeOpeningMoveRef = useRef(initialSession.needsResumeOpeningMove);
   const needsResumeEngineMoveRef = useRef(initialSession.needsResumeEngineMove);
 
-  const [fen, setFen] = useState(initialSession.fen);
+  const [fen, setFenState] = useState(initialSession.fen);
   const [openingsList, setOpeningsList] = useState([]);
   const [selectedOpeningId, setSelectedOpeningId] = useState(initialSession.selectedOpeningId);
   const [openingMoves, setOpeningMoves] = useState(initialSession.openingMoves);
@@ -47,7 +47,15 @@ export function useChessTrainer() {
   const [engineElo, setEngineElo] = useState(initialSession.engineElo);
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [evaluation, setEvaluation] = useState(initialSession.evaluation);
+  const [selectedSquare, setSelectedSquare] = useState("");
+  const [legalTargetSquares, setLegalTargetSquares] = useState([]);
   const selectedEngineLabel = getEngineLabel(selectedEngine);
+
+  const setFen = useCallback((nextFen) => {
+    setSelectedSquare("");
+    setLegalTargetSquares([]);
+    setFenState(nextFen);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -156,6 +164,11 @@ export function useChessTrainer() {
     engine.invalidatePendingAsyncWork();
   }
 
+  function clearSquareSelection() {
+    setSelectedSquare("");
+    setLegalTargetSquares([]);
+  }
+
   useEffect(() => {
     clearAllAsyncWorkRef.current = clearAllAsyncWork;
   });
@@ -168,6 +181,7 @@ export function useChessTrainer() {
 
   function resetSessionState() {
     clearAllAsyncWork();
+    clearSquareSelection();
 
     gameRef.current = new Chess();
     setFen(gameRef.current.fen());
@@ -238,9 +252,7 @@ export function useChessTrainer() {
     engine.scheduleEngineMove(300);
   }, [engine]);
 
-  function handlePieceDrop(event) {
-    const { sourceSquare, targetSquare } = event;
-
+  function canPlayerAct() {
     if (isEngineThinking || engine.isEngineMoveScheduled) {
       setStatus(t("trainer.waitEngineMove", { engineLabel: selectedEngineLabel }));
       return false;
@@ -251,8 +263,48 @@ export function useChessTrainer() {
         setStatus(t("trainer.programTurn"));
         return false;
       }
-    } else if (!isPlayerTurnInGame(gameRef.current, playerColor)) {
+
+      return true;
+    }
+
+    if (!isPlayerTurnInGame(gameRef.current, playerColor)) {
       setStatus(t("trainer.engineTurn", { engineLabel: selectedEngineLabel }));
+      return false;
+    }
+
+    return true;
+  }
+
+  function isOwnPieceSquare(square) {
+    const piece = gameRef.current.get(square);
+    if (!piece) {
+      return false;
+    }
+
+    return (
+      (playerColor === "white" && piece.color === "w") ||
+      (playerColor === "black" && piece.color === "b")
+    );
+  }
+
+  function selectSquare(square) {
+    if (!canPlayerAct() || !isOwnPieceSquare(square)) {
+      return;
+    }
+
+    const legalTargets = gameRef.current
+      .moves({
+        square,
+        verbose: true
+      })
+      .map((move) => move.to);
+
+    setSelectedSquare(square);
+    setLegalTargetSquares(legalTargets);
+  }
+
+  function tryPlayerMove(sourceSquare, targetSquare) {
+    if (!canPlayerAct()) {
       return false;
     }
 
@@ -273,6 +325,8 @@ export function useChessTrainer() {
       return false;
     }
 
+    clearSquareSelection();
+
     if (mode === "opening") {
       return openingTraining.handleOpeningModeMove(move);
     }
@@ -286,6 +340,34 @@ export function useChessTrainer() {
     }
 
     return engine.handlePlayModeMove();
+  }
+
+  function handlePieceDrop(event) {
+    const { sourceSquare, targetSquare } = event;
+    return tryPlayerMove(sourceSquare, targetSquare);
+  }
+
+  function handleSquareClick({ square }) {
+    if (!square) {
+      return;
+    }
+
+    if (!selectedSquare) {
+      selectSquare(square);
+      return;
+    }
+
+    if (selectedSquare === square) {
+      clearSquareSelection();
+      return;
+    }
+
+    if (isOwnPieceSquare(square)) {
+      selectSquare(square);
+      return;
+    }
+
+    tryPlayerMove(selectedSquare, square);
   }
 
   const boardArrows = useMemo(() => {
@@ -305,12 +387,31 @@ export function useChessTrainer() {
   }, [mode, showHint, hint, fen, bestMove, bestMoves]);
 
   const customSquareStyles = useMemo(() => {
-    if (mode !== "free") {
-      return {};
+    const styles = mode === "free" ? getBookMoveSquareStyles(bookMoveSquare) : {};
+
+    if (selectedSquare) {
+      const currentStyles = styles[selectedSquare] || {};
+      styles[selectedSquare] = {
+        ...currentStyles,
+        boxShadow: [currentStyles.boxShadow, "inset 0 0 0 3px rgba(59, 130, 246, 0.95)"]
+          .filter(Boolean)
+          .join(", "),
+        backgroundColor: "rgba(59, 130, 246, 0.18)"
+      };
     }
 
-    return getBookMoveSquareStyles(bookMoveSquare);
-  }, [mode, bookMoveSquare]);
+    legalTargetSquares.forEach((square) => {
+      const currentStyles = styles[square] || {};
+      styles[square] = {
+        ...currentStyles,
+        boxShadow: [currentStyles.boxShadow, "inset 0 0 0 3px rgba(34, 197, 94, 0.9)"]
+          .filter(Boolean)
+          .join(", ")
+      };
+    });
+
+    return styles;
+  }, [mode, bookMoveSquare, selectedSquare, legalTargetSquares]);
 
   const chessboardOptions = {
     id: "OpeningTrainerBoard",
@@ -326,7 +427,8 @@ export function useChessTrainer() {
     numericNotationStyle: {
       transform: "translateY(4px)"
     },
-    onPieceDrop: handlePieceDrop
+    onPieceDrop: handlePieceDrop,
+    onSquareClick: handleSquareClick
   };
 
   function getVisibleHint() {

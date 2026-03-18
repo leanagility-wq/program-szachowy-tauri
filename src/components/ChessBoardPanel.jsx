@@ -31,6 +31,24 @@ function ChessBoardPanel({
   const [boardWidth, setBoardWidth] = useState(480);
   const boardWrapRef = useRef(null);
 
+  function renderMobileSquare({ square, piece, children }) {
+    return (
+      <div className="mobile-square-click-target-wrap">
+        {children}
+        <button
+          type="button"
+          className="mobile-square-click-target"
+          aria-label={`square-${square}`}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            chessboardOptions.onSquareClick?.({ square, piece });
+          }}
+        />
+      </div>
+    );
+  }
+
   useEffect(() => {
     function updateBoardWidth() {
       const viewportWidth = typeof window === "undefined" ? 1280 : window.innerWidth;
@@ -119,6 +137,10 @@ function ChessBoardPanel({
             <Chessboard
               options={{
                 ...chessboardOptions,
+                allowDragging: !isMobileLayout,
+                canDragPiece: isMobileLayout ? () => false : chessboardOptions.canDragPiece,
+                onSquareClick: isMobileLayout ? chessboardOptions.onSquareClick : undefined,
+                squareRenderer: isMobileLayout ? renderMobileSquare : undefined,
                 boardWidth
               }}
             />
