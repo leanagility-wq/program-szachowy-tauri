@@ -3,6 +3,11 @@ use std::path::PathBuf;
 
 use tauri::Manager;
 
+#[cfg(target_os = "android")]
+use jni::objects::{JObject, JString};
+#[cfg(target_os = "android")]
+use jni::JavaVM;
+
 const OPENINGS_DB_BYTES: &[u8] = include_bytes!("../resources/db/openings.db");
 
 fn log_platform(message: &str) {
@@ -155,6 +160,22 @@ pub fn get_maia_weights_path(app: &tauri::AppHandle) -> Result<PathBuf, String> 
 
 #[cfg(target_os = "android")]
 fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    if let Some(native_lib_dir) = detect_android_native_lib_dir_from_context() {
+        let stockfish_path = native_lib_dir.join("libstockfish.so");
+        if stockfish_path.exists() {
+            log_platform(&format!(
+                "android stockfish path resolved from context={}",
+                stockfish_path.display()
+            ));
+            return Ok(stockfish_path);
+        }
+
+        log_platform(&format!(
+            "android context native lib dir detected, but libstockfish.so missing: {}",
+            stockfish_path.display()
+        ));
+    }
+
     if let Some(native_lib_dir) = detect_android_native_lib_dir_from_env() {
         let stockfish_path = native_lib_dir.join("libstockfish.so");
         if stockfish_path.exists() {
@@ -213,6 +234,35 @@ fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String>
         "Nie znaleziono androidowej binarki Stockfisha. Ostatnio sprawdzona ścieżka: {}",
         stockfish_path.display()
     ))
+}
+
+#[cfg(target_os = "android")]
+fn detect_android_native_lib_dir_from_context() -> Option<PathBuf> {
+    let ctx = ndk_context::android_context();
+    let vm = unsafe { JavaVM::from_raw(ctx.vm().cast()) }.ok()?;
+    let mut env = vm.attach_current_thread().ok()?;
+
+    let context = unsafe { JObject::from_raw(ctx.context().cast()) };
+    let app_info = env
+        .call_method(&context, "getApplicationInfo", "()Landroid/content/pm/ApplicationInfo;", &[])
+        .ok()?
+        .l()
+        .ok()?;
+
+    let native_library_dir = env
+        .get_field(&app_info, "nativeLibraryDir", "Ljava/lang/String;")
+        .ok()?
+        .l()
+        .ok()?;
+
+    let native_library_dir = JString::from(native_library_dir);
+    let native_library_dir: String = env.get_string(&native_library_dir).ok()?.into();
+
+    log_platform(&format!(
+        "android native lib dir detected from context={native_library_dir}"
+    ));
+
+    Some(PathBuf::from(native_library_dir))
 }
 
 #[cfg(target_os = "android")]
