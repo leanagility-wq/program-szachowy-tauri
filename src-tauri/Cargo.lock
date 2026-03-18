@@ -89,7 +89,9 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "chess",
+ "jni",
  "log",
+ "ndk-context",
  "rusqlite",
  "serde",
  "serde_json",
