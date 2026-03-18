@@ -155,6 +155,22 @@ pub fn get_maia_weights_path(app: &tauri::AppHandle) -> Result<PathBuf, String> 
 
 #[cfg(target_os = "android")]
 fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    if let Some(native_lib_dir) = detect_android_native_lib_dir_from_env() {
+        let stockfish_path = native_lib_dir.join("libstockfish.so");
+        if stockfish_path.exists() {
+            log_platform(&format!(
+                "android stockfish path resolved from LD_LIBRARY_PATH={}",
+                stockfish_path.display()
+            ));
+            return Ok(stockfish_path);
+        }
+
+        log_platform(&format!(
+            "android LD_LIBRARY_PATH dir detected, but libstockfish.so missing: {}",
+            stockfish_path.display()
+        ));
+    }
+
     if let Some(native_lib_dir) = detect_android_native_lib_dir() {
         let stockfish_path = native_lib_dir.join("libstockfish.so");
         if stockfish_path.exists() {
@@ -197,6 +213,25 @@ fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String>
         "Nie znaleziono androidowej binarki Stockfisha. Ostatnio sprawdzona ścieżka: {}",
         stockfish_path.display()
     ))
+}
+
+#[cfg(target_os = "android")]
+fn detect_android_native_lib_dir_from_env() -> Option<PathBuf> {
+    let value = std::env::var("LD_LIBRARY_PATH").ok()?;
+    log_platform(&format!("android LD_LIBRARY_PATH={value}"));
+
+    for part in value.split(':') {
+        let candidate = PathBuf::from(part);
+        if candidate.join("libstockfish.so").exists() {
+            log_platform(&format!(
+                "android native lib dir detected from LD_LIBRARY_PATH={}",
+                candidate.display()
+            ));
+            return Some(candidate);
+        }
+    }
+
+    None
 }
 
 #[cfg(target_os = "android")]
