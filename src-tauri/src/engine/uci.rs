@@ -7,6 +7,10 @@ use std::time::Duration;
 use crate::chess_logic::normalize_evaluation_for_white;
 use crate::models::Evaluation;
 
+fn log_uci(binary_label: &str, message: &str) {
+    eprintln!("[uci:{binary_label}] {message}");
+}
+
 pub enum SearchLimit {
     Depth(u32),
     MoveTime(u64),
@@ -40,6 +44,19 @@ impl UciProcess {
             command.current_dir(parent_dir);
         }
 
+        log_uci(
+            config.binary_label,
+            &format!(
+                "spawn start path={} cwd={}",
+                config.binary_path.display(),
+                config
+                    .binary_path
+                    .parent()
+                    .map(|dir| dir.display().to_string())
+                    .unwrap_or_else(|| "<none>".to_string())
+            ),
+        );
+
         let mut child = command
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -52,6 +69,8 @@ impl UciProcess {
                     config.binary_path.display()
                 )
             })?;
+
+        log_uci(config.binary_label, &format!("spawn ok pid={}", child.id()));
 
         let stdin = child
             .stdin
@@ -74,21 +93,33 @@ impl UciProcess {
             for line in reader.lines() {
                 match line {
                     Ok(line) => {
+                        log_uci(binary_label, &format!("stdout {line}"));
                         if stdout_tx.send(line).is_err() {
                             break;
                         }
                     }
-                    Err(_) => break,
+                    Err(error) => {
+                        log_uci(binary_label, &format!("stdout read error: {error}"));
+                        break;
+                    }
                 }
             }
         });
 
         std::thread::spawn(move || {
             let reader = BufReader::new(stderr);
-            for line in reader.lines().map_while(Result::ok) {
-                let trimmed = line.trim();
-                if !trimmed.is_empty() {
-                    eprintln!("{binary_label} stderr: {trimmed}");
+            for line in reader.lines() {
+                match line {
+                    Ok(line) => {
+                        let trimmed = line.trim();
+                        if !trimmed.is_empty() {
+                            log_uci(binary_label, &format!("stderr {trimmed}"));
+                        }
+                    }
+                    Err(error) => {
+                        log_uci(binary_label, &format!("stderr read error: {error}"));
+                        break;
+                    }
                 }
             }
         });
@@ -103,6 +134,7 @@ impl UciProcess {
     }
 
     fn send(&mut self, command: &str) -> Result<(), String> {
+        log_uci(self.binary_label, &format!("stdin {command}"));
         writeln!(self.stdin, "{command}")
             .map_err(|error| format!("{}: błąd zapisu do stdin: {error}", self.binary_label))
     }
@@ -115,6 +147,27 @@ impl UciProcess {
 
     fn receive_line(&mut self) -> Result<String, String> {
         self.stdout_rx.recv_timeout(self.timeout).map_err(|_| {
+            match self.child.try_wait() {
+                Ok(Some(status)) => {
+                    log_uci(
+                        self.binary_label,
+                        &format!("timeout while waiting for stdout, process exited: {status}"),
+                    );
+                }
+                Ok(None) => {
+                    log_uci(
+                        self.binary_label,
+                        "timeout while waiting for stdout, process still running",
+                    );
+                }
+                Err(error) => {
+                    log_uci(
+                        self.binary_label,
+                        &format!("timeout while waiting for stdout, try_wait error: {error}"),
+                    );
+                }
+            }
+
             self.kill();
             format!(
                 "{}: timeout oczekiwania na odpowiedź silnika",
@@ -124,12 +177,14 @@ impl UciProcess {
     }
 
     fn shutdown(&mut self) {
+        log_uci(self.binary_label, "shutdown");
         let _ = self.send("quit");
         let _ = self.flush();
         self.kill();
     }
 
     fn kill(&mut self) {
+        log_uci(self.binary_label, "kill");
         let _ = self.child.kill();
     }
 }
@@ -145,6 +200,7 @@ fn initialize_engine(
     binary_label: &'static str,
     startup_commands: &[String],
 ) -> Result<(), String> {
+    log_uci(binary_label, "initialize start");
     process.send("uci")?;
     process.flush()?;
 
@@ -173,6 +229,7 @@ fn initialize_engine(
     loop {
         let line = process.receive_line()?;
         if line.contains("readyok") {
+            log_uci(binary_label, "initialize ready");
             return Ok(());
         }
     }
@@ -184,6 +241,14 @@ fn send_position_and_go(
     fen: &str,
     search_limit: &SearchLimit,
 ) -> Result<(), String> {
+    log_uci(
+        binary_label,
+        &format!(
+            "set position fen={fen} search_limit={}",
+            describe_search_limit(search_limit)
+        ),
+    );
+
     process.send(&format!("position fen {fen}")).map_err(|error| {
         format!("{binary_label}: błąd ustawiania pozycji dla silnika: {error}")
     })?;
@@ -200,7 +265,17 @@ fn send_position_and_go(
     process.flush()
 }
 
-pub fn run_bestmove(config: &UciEngineConfig, request: &BestMoveRequest<'_>) -> Result<String, String> {
+fn describe_search_limit(search_limit: &SearchLimit) -> String {
+    match search_limit {
+        SearchLimit::Depth(depth) => format!("depth:{depth}"),
+        SearchLimit::MoveTime(ms) => format!("movetime:{ms}"),
+    }
+}
+
+pub fn run_bestmove(
+    config: &UciEngineConfig,
+    request: &BestMoveRequest<'_>,
+) -> Result<String, String> {
     let mut startup_commands = config.startup_commands.clone();
 
     if let Some(elo) = request.elo {
@@ -237,7 +312,12 @@ pub fn run_bestmove(config: &UciEngineConfig, request: &BestMoveRequest<'_>) -> 
     }
 }
 
-pub fn run_multipv(config: &UciEngineConfig, fen: &str, depth: u32, count: usize) -> Result<Vec<String>, String> {
+pub fn run_multipv(
+    config: &UciEngineConfig,
+    fen: &str,
+    depth: u32,
+    count: usize,
+) -> Result<Vec<String>, String> {
     let mut startup_commands = config.startup_commands.clone();
     startup_commands.push(format!("setoption name MultiPV value {count}"));
 

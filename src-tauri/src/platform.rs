@@ -5,6 +5,10 @@ use tauri::Manager;
 
 const OPENINGS_DB_BYTES: &[u8] = include_bytes!("../resources/db/openings.db");
 
+fn log_platform(message: &str) {
+    eprintln!("[platform] {message}");
+}
+
 fn get_resource_path(app: &tauri::AppHandle, parts: &[&str]) -> Result<PathBuf, String> {
     let mut path = app
         .path()
@@ -68,6 +72,7 @@ pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     writable_path = writable_path.join("db").join("openings.db");
 
     if writable_path.exists() {
+        log_platform(&format!("database path existing={}", writable_path.display()));
         return Ok(writable_path);
     }
 
@@ -78,6 +83,11 @@ pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
         &[&["resources", "db", "openings.db"], &["db", "openings.db"]],
     ) {
         if fs::copy(&source_path, &writable_path).is_ok() {
+            log_platform(&format!(
+                "database copied from {} to {}",
+                source_path.display(),
+                writable_path.display()
+            ));
             return Ok(writable_path);
         }
     }
@@ -88,6 +98,11 @@ pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
             writable_path.display()
         )
     })?;
+
+    log_platform(&format!(
+        "database written from embedded bytes to {}",
+        writable_path.display()
+    ));
 
     Ok(writable_path)
 }
@@ -144,12 +159,21 @@ fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String>
         format!("Nie udało się ustalić ścieżki do natywnej biblioteki aplikacji: {error}")
     })?;
 
+    log_platform(&format!(
+        "android current binary path={}",
+        current_binary.display()
+    ));
+
     let native_lib_dir = current_binary.parent().ok_or_else(|| {
         "Nie udało się ustalić katalogu natywnych bibliotek aplikacji.".to_string()
     })?;
 
     let stockfish_path = native_lib_dir.join("libstockfish.so");
     if stockfish_path.exists() {
+        log_platform(&format!(
+            "android stockfish path resolved={}",
+            stockfish_path.display()
+        ));
         return Ok(stockfish_path);
     }
 
