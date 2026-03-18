@@ -48,7 +48,7 @@ export function useChessTrainer() {
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [evaluation, setEvaluation] = useState(initialSession.evaluation);
   const [selectedSquare, setSelectedSquare] = useState("");
-  const [legalTargetSquares, setLegalTargetSquares] = useState([]);
+  const [, setLegalTargetSquares] = useState([]);
   const selectedEngineLabel = getEngineLabel(selectedEngine);
 
   const setFen = useCallback((nextFen) => {
@@ -400,18 +400,8 @@ export function useChessTrainer() {
       };
     }
 
-    legalTargetSquares.forEach((square) => {
-      const currentStyles = styles[square] || {};
-      styles[square] = {
-        ...currentStyles,
-        boxShadow: [currentStyles.boxShadow, "inset 0 0 0 3px rgba(34, 197, 94, 0.9)"]
-          .filter(Boolean)
-          .join(", ")
-      };
-    });
-
     return styles;
-  }, [mode, bookMoveSquare, selectedSquare, legalTargetSquares]);
+  }, [mode, bookMoveSquare, selectedSquare]);
 
   const chessboardOptions = {
     id: "OpeningTrainerBoard",
@@ -571,7 +561,6 @@ export function useChessTrainer() {
     isEngineMoveScheduled: engine.isEngineMoveScheduled,
     evaluation,
     selectedSquare,
-    legalTargetSquares,
     chessboardOptions,
     openingName: displayedOpeningName,
     moveIndex,

@@ -24,7 +24,6 @@ function ChessBoardPanel({
   isEngineMoveScheduled,
   evaluation,
   selectedSquare,
-  legalTargetSquares,
   chessboardOptions,
   isMobileLayout
 }) {
@@ -36,10 +35,6 @@ function ChessBoardPanel({
   function getMobileSquareStateClass(square) {
     if (square === selectedSquare) {
       return "mobile-square-click-target is-selected";
-    }
-
-    if (legalTargetSquares.includes(square)) {
-      return "mobile-square-click-target is-legal-target";
     }
 
     return "mobile-square-click-target";
