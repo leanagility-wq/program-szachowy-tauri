@@ -155,12 +155,28 @@ pub fn get_maia_weights_path(app: &tauri::AppHandle) -> Result<PathBuf, String> 
 
 #[cfg(target_os = "android")]
 fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    if let Some(native_lib_dir) = detect_android_native_lib_dir() {
+        let stockfish_path = native_lib_dir.join("libstockfish.so");
+        if stockfish_path.exists() {
+            log_platform(&format!(
+                "android stockfish path resolved from /proc/self/maps={}",
+                stockfish_path.display()
+            ));
+            return Ok(stockfish_path);
+        }
+
+        log_platform(&format!(
+            "android native lib dir detected, but libstockfish.so missing: {}",
+            stockfish_path.display()
+        ));
+    }
+
     let current_binary = tauri::process::current_binary(&app.env()).map_err(|error| {
         format!("Nie udało się ustalić ścieżki do natywnej biblioteki aplikacji: {error}")
     })?;
 
     log_platform(&format!(
-        "android current binary path={}",
+        "android current binary path fallback={}",
         current_binary.display()
     ));
 
@@ -171,14 +187,41 @@ fn get_android_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String>
     let stockfish_path = native_lib_dir.join("libstockfish.so");
     if stockfish_path.exists() {
         log_platform(&format!(
-            "android stockfish path resolved={}",
+            "android stockfish path resolved from fallback={}",
             stockfish_path.display()
         ));
         return Ok(stockfish_path);
     }
 
     Err(format!(
-        "Nie znaleziono androidowej binarki Stockfisha w katalogu natywnych bibliotek: {}",
+        "Nie znaleziono androidowej binarki Stockfisha. Ostatnio sprawdzona ścieżka: {}",
         stockfish_path.display()
     ))
+}
+
+#[cfg(target_os = "android")]
+fn detect_android_native_lib_dir() -> Option<PathBuf> {
+    let maps = fs::read_to_string("/proc/self/maps").ok()?;
+
+    for line in maps.lines() {
+        if !line.contains("libapp_lib.so") {
+            continue;
+        }
+
+        let path = line.split_whitespace().last()?;
+        if !path.starts_with('/') {
+            continue;
+        }
+
+        let path = PathBuf::from(path);
+        let parent = path.parent()?.to_path_buf();
+        log_platform(&format!(
+            "android native lib dir detected from /proc/self/maps={}",
+            parent.display()
+        ));
+        return Some(parent);
+    }
+
+    log_platform("android native lib dir not found in /proc/self/maps");
+    None
 }
