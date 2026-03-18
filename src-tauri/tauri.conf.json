@@ -1,0 +1,46 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Trener Szachowy",
+  "version": "0.1.0",
+  "identifier": "pl.slowo.trenerszachowy",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Trener Szachowy",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": [
+      "resources/db/openings.db",
+      "resources/engines/windows/stockfish.exe",
+      "resources/engines/windows/lc0.exe",
+      "resources/engines/windows/maia.pb.gz",
+      "resources/engines/windows/libopenblas.dll",
+      "resources/engines/windows/mimalloc-override.dll",
+      "resources/engines/windows/mimalloc-redirect.dll"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
