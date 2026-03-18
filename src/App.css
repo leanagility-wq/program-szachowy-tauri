@@ -257,6 +257,13 @@ input {
   color: #9ca3af;
 }
 
+.control-note {
+  margin: -2px 0 12px;
+  color: #fbbf24;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .app-select {
   width: 100%;
   min-height: 42px;

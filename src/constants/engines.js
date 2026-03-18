@@ -7,7 +7,7 @@ export const ENGINE_OPTIONS = [
     id: "stockfish",
     label: "Stockfish",
     description: "Analiza i najlepszy ruch",
-    supportedPlatforms: ["windows", "android", "desktop"]
+    supportedPlatforms: ["windows", "desktop"]
   },
   {
     id: "maia",
@@ -43,8 +43,12 @@ export function getEngineOptionLabel(engineId) {
   return ENGINE_OPTIONS.find((engine) => engine.id === engineId)?.label || "Engine";
 }
 
+export function hasEngineSupportOnPlatform(platform = getRuntimePlatform()) {
+  return getEngineOptionAvailability(platform).some((engine) => engine.isAvailable);
+}
+
 export function getDefaultEngineForPlatform(platform = getRuntimePlatform()) {
   return (
-    getEngineOptionAvailability(platform).find((engine) => engine.isAvailable)?.id || "stockfish"
+    getEngineOptionAvailability(platform).find((engine) => engine.isAvailable)?.id || ""
   );
 }

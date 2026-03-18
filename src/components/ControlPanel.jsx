@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useI18n } from "../i18n";
-import { ENGINE_ELO_OPTIONS, getEngineOptionAvailability } from "../constants/engines";
+import {
+  ENGINE_ELO_OPTIONS,
+  getEngineOptionAvailability,
+  hasEngineSupportOnPlatform
+} from "../constants/engines";
 import { getRuntimePlatform } from "../platform/runtime";
 
 function ControlPanel({
@@ -27,6 +31,7 @@ function ControlPanel({
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const runtimePlatform = getRuntimePlatform();
   const engineOptions = getEngineOptionAvailability(runtimePlatform);
+  const hasEngineSupport = hasEngineSupportOnPlatform(runtimePlatform);
 
   const advancedControls = (
     <>
@@ -37,6 +42,7 @@ function ControlPanel({
             value={selectedEngine}
             onChange={(e) => setSelectedEngine(e.target.value)}
             className="app-select"
+            disabled={!hasEngineSupport}
           >
             {engineOptions.map((engine) => {
               const label =
@@ -59,7 +65,7 @@ function ControlPanel({
             value={engineElo}
             onChange={(e) => setEngineElo(Number(e.target.value))}
             className="app-select"
-            disabled={selectedEngine !== "stockfish"}
+            disabled={!hasEngineSupport || selectedEngine !== "stockfish"}
           >
             {ENGINE_ELO_OPTIONS.map((elo) => (
               <option key={elo} value={elo}>
@@ -69,6 +75,8 @@ function ControlPanel({
           </select>
         </div>
       </div>
+
+      {!hasEngineSupport ? <div className="control-note">{t("control.mobileNoEngine")}</div> : null}
 
       <div className={`button-row${isMobileLayout ? " button-row-mobile-secondary" : ""}`}>
         <button className="app-button" onClick={onResetTraining}>

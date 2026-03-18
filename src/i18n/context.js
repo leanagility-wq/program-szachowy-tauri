@@ -20,6 +20,8 @@ export const messages = {
     "control.stockfishOption": "Stockfish - analiza / najlepszy ruch",
     "control.maiaOption": "Maia - ruch ludzki",
     "control.desktopOnly": "tylko desktop",
+    "control.mobileNoEngine":
+      "W tej wersji Android działa trening otwarć. Silnik do gry dalej będzie dodany osobno.",
     "control.reset": "Reset",
     "control.showHint": "Pokaż podpowiedź",
     "control.undoMove": "Cofnij ruch",
@@ -68,6 +70,9 @@ export const messages = {
     "trainer.fetchOpeningError": "Błąd pobierania otwarcia",
     "trainer.freeTrainingStarted":
       "Trening bez szablonu uruchomiony. Graj naturalnie w otwarciu z {{engineLabel}}.",
+    "trainer.freeTrainingUnavailable":
+      "Tryb gry z silnikiem nie jest jeszcze dostępny w wersji Android.",
+    "trainer.engineUnavailable": "Silnik nie jest jeszcze dostępny w wersji Android.",
     "trainer.nextRepertoireMove": "Pokazano kolejny ruch z repertuaru.",
     "trainer.trainingReset": "Trening zresetowany",
     "trainer.sessionSaveError": "Błąd zapisu sesji:",
@@ -89,14 +94,20 @@ export const messages = {
     "engine.undoSuccess": "Cofnięto ostatni ruch / parę ruchów",
     "opening.lineFinishedContinue":
       "Linia otwarcia zakończona. Możesz grać dalej z {{engineLabel}}.",
+    "opening.lineFinishedMobile":
+      "Linia otwarcia zakończona. Wersja Android kończy trening na tym etapie.",
     "opening.programPlayed": "Program zagrał: {{move}}",
     "opening.programPlayedFinished":
       "Program zagrał: {{move}}. Linia otwarcia zakończona.",
+    "opening.programPlayedFinishedMobile":
+      "Program zagrał: {{move}}. Linia otwarcia zakończona w wersji Android.",
     "opening.playMoveError": "Błąd podczas ruchu programu",
     "opening.incorrectTryAgain": "Niepoprawny ruch. Spróbuj jeszcze raz.",
     "opening.correctMove": "Poprawny ruch: {{move}}",
     "opening.correctMoveFinished":
       "Poprawny ruch: {{move}}. Linia otwarcia zakończona.",
+    "opening.correctMoveFinishedMobile":
+      "Poprawny ruch: {{move}}. Linia otwarcia zakończona w wersji Android.",
     "opening.hintsOnlyTraining": "Podpowiedzi są dostępne tylko w trybie treningu otwarcia",
     "opening.hintOnlyYourTurn": "Podpowiedź jest dostępna tylko w Twoim ruchu",
     "opening.noNextHint": "Brak kolejnej podpowiedzi",
@@ -123,6 +134,8 @@ export const messages = {
     "control.stockfishOption": "Stockfish - analysis / best move",
     "control.maiaOption": "Maia - human-like move",
     "control.desktopOnly": "desktop only",
+    "control.mobileNoEngine":
+      "This Android build supports opening training only for now. Engine play will be added separately.",
     "control.reset": "Reset",
     "control.showHint": "Show hint",
     "control.undoMove": "Undo move",
@@ -171,6 +184,9 @@ export const messages = {
     "trainer.fetchOpeningError": "Error fetching opening",
     "trainer.freeTrainingStarted":
       "Free training started. Play naturally in the opening against {{engineLabel}}.",
+    "trainer.freeTrainingUnavailable":
+      "Engine-based play is not available in the Android build yet.",
+    "trainer.engineUnavailable": "The engine is not available in the Android build yet.",
     "trainer.nextRepertoireMove": "Displayed the next repertoire move.",
     "trainer.trainingReset": "Training reset",
     "trainer.sessionSaveError": "Error saving session:",
@@ -192,13 +208,19 @@ export const messages = {
     "engine.undoSuccess": "Undid the last move / move pair",
     "opening.lineFinishedContinue":
       "Opening line finished. You can continue playing with {{engineLabel}}.",
+    "opening.lineFinishedMobile":
+      "Opening line finished. The Android build currently ends the training here.",
     "opening.programPlayed": "Program played: {{move}}",
     "opening.programPlayedFinished":
       "Program played: {{move}}. Opening line finished.",
+    "opening.programPlayedFinishedMobile":
+      "Program played: {{move}}. Opening line finished in the Android build.",
     "opening.playMoveError": "Error during program move",
     "opening.incorrectTryAgain": "Incorrect move. Try again.",
     "opening.correctMove": "Correct move: {{move}}",
     "opening.correctMoveFinished": "Correct move: {{move}}. Opening line finished.",
+    "opening.correctMoveFinishedMobile":
+      "Correct move: {{move}}. Opening line finished in the Android build.",
     "opening.hintsOnlyTraining": "Hints are available only in opening training mode",
     "opening.hintOnlyYourTurn": "The hint is available only on your turn",
     "opening.noNextHint": "No next hint available",

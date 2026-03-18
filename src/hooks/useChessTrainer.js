@@ -11,15 +11,17 @@ import {
 import { useOpeningTraining } from "./useOpeningTraining";
 import { useEnginePlay } from "./useEnginePlay";
 import { useFreeOpeningTraining } from "./useFreeOpeningTraining";
-import { getEngineLabel } from "../constants/engines";
+import { getEngineLabel, hasEngineSupportOnPlatform } from "../constants/engines";
 import { useI18n } from "../i18n";
 import {
   getInitialSessionState,
   persistSessionSnapshot
 } from "../features/trainer/sessionState";
+import { getRuntimePlatform } from "../platform/runtime";
 
 export function useChessTrainer() {
   const { t } = useI18n();
+  const hasEngineSupport = hasEngineSupportOnPlatform(getRuntimePlatform());
   const [initialSession] = useState(getInitialSessionState);
   const gameRef = useRef(new Chess(initialSession.fen));
   const openingMoveTimeoutRef = useRef(null);
@@ -215,6 +217,7 @@ export function useChessTrainer() {
 
   const openingTraining = useOpeningTraining({
     engineLabel: selectedEngineLabel,
+    canContinueWithEngine: hasEngineSupport,
     playerColor,
     openingMoves,
     moveIndex,
@@ -459,6 +462,11 @@ export function useChessTrainer() {
   }
 
   function startFreeTraining() {
+    if (!hasEngineSupport) {
+      setStatus(t("trainer.freeTrainingUnavailable"));
+      return;
+    }
+
     resetSessionState();
     resetFreeOpeningAnalysis();
     setOpeningMoves([]);
@@ -485,6 +493,11 @@ export function useChessTrainer() {
   function handleRequestHint() {
     if (mode === "opening") {
       showCurrentHint();
+      return;
+    }
+
+    if (!hasEngineSupport) {
+      setStatus(t("trainer.engineUnavailable"));
       return;
     }
 

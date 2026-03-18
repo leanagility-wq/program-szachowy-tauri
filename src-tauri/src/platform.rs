@@ -3,6 +3,8 @@ use std::path::PathBuf;
 
 use tauri::Manager;
 
+const OPENINGS_DB_BYTES: &[u8] = include_bytes!("../resources/db/openings.db");
+
 fn get_resource_path(app: &tauri::AppHandle, parts: &[&str]) -> Result<PathBuf, String> {
     let mut path = app
         .path()
@@ -60,20 +62,23 @@ pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
         return Ok(writable_path);
     }
 
-    let source_path = find_existing_path(
-        app,
-        &[&["resources", "db", "openings.db"], &["db", "openings.db"]],
-    )?;
-
     if let Some(parent) = writable_path.parent() {
         fs::create_dir_all(parent)
             .map_err(|error| format!("Nie udało się utworzyć katalogu bazy danych: {error}"))?;
     }
 
-    fs::copy(&source_path, &writable_path).map_err(|error| {
+    if let Ok(source_path) = find_existing_path(
+        app,
+        &[&["resources", "db", "openings.db"], &["db", "openings.db"]],
+    ) {
+        if fs::copy(&source_path, &writable_path).is_ok() {
+            return Ok(writable_path);
+        }
+    }
+
+    fs::write(&writable_path, OPENINGS_DB_BYTES).map_err(|error| {
         format!(
-            "Nie udało się skopiować bazy {} do {}: {error}",
-            source_path.display(),
+            "Nie udało się zapisać wbudowanej bazy {}: {error}",
             writable_path.display()
         )
     })?;
@@ -83,9 +88,7 @@ pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 
 pub fn get_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     if !cfg!(target_os = "windows") {
-        return Err(
-            "Stockfish ma obecnie tylko desktopową implementację dla Windows.".to_string(),
-        );
+        return Err("Stockfish ma obecnie tylko desktopową implementację dla Windows.".to_string());
     }
 
     find_existing_path(

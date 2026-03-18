@@ -3,6 +3,7 @@ import { useI18n } from "../i18n";
 
 export function useOpeningTraining({
   engineLabel,
+  canContinueWithEngine,
   playerColor,
   openingMoves,
   moveIndex,
@@ -27,7 +28,11 @@ export function useOpeningTraining({
     const move = movesFromArg[index];
 
     if (!move) {
-      enterPlayMode(t("opening.lineFinishedContinue", { engineLabel }));
+      if (canContinueWithEngine) {
+        enterPlayMode(t("opening.lineFinishedContinue", { engineLabel }));
+      } else {
+        setStatus(t("opening.lineFinishedMobile"));
+      }
       return;
     }
 
@@ -50,7 +55,11 @@ export function useOpeningTraining({
       setStatus(t("opening.programPlayed", { move }));
 
       if (!movesFromArg[nextIndex]) {
-        enterPlayMode(t("opening.programPlayedFinished", { move }));
+        if (canContinueWithEngine) {
+          enterPlayMode(t("opening.programPlayedFinished", { move }));
+        } else {
+          setStatus(t("opening.programPlayedFinishedMobile", { move }));
+        }
       }
     } catch (error) {
       console.error(error);
@@ -62,6 +71,12 @@ export function useOpeningTraining({
     const correctMove = openingMoves[moveIndex];
 
     if (!correctMove) {
+      if (!canContinueWithEngine) {
+        gameRef.current.undo();
+        setStatus(t("opening.lineFinishedMobile"));
+        return false;
+      }
+
       setFen(gameRef.current.fen());
       refreshEvaluation(gameRef.current.fen());
       enterPlayMode(t("opening.lineFinishedContinue", { engineLabel }));
@@ -94,7 +109,11 @@ export function useOpeningTraining({
         }, 400);
       }
     } else {
-      enterPlayMode(t("opening.correctMoveFinished", { move: move.san }));
+      if (canContinueWithEngine) {
+        enterPlayMode(t("opening.correctMoveFinished", { move: move.san }));
+      } else {
+        setStatus(t("opening.correctMoveFinishedMobile", { move: move.san }));
+      }
     }
 
     return true;

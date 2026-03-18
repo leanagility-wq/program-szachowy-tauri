@@ -2,6 +2,7 @@ import { Chess } from "chess.js";
 import {
   ENGINE_ELO_OPTIONS,
   getDefaultEngineForPlatform,
+  hasEngineSupportOnPlatform,
   isEngineAvailableOnPlatform,
   isSupportedEngine
 } from "../../constants/engines";
@@ -49,10 +50,12 @@ export function readPersistedSession() {
 export function getInitialSessionState() {
   const persistedSession = readPersistedSession();
   const runtimePlatform = getRuntimePlatform();
+  const hasEngineSupport = hasEngineSupportOnPlatform(runtimePlatform);
   const fen = getSafeFen(persistedSession?.fen);
   const playerColor = persistedSession?.playerColor === "black" ? "black" : "white";
   const mode =
-    persistedSession?.mode === "play" || persistedSession?.mode === "free"
+    hasEngineSupport &&
+    (persistedSession?.mode === "play" || persistedSession?.mode === "free")
       ? persistedSession.mode
       : "opening";
   const openingMoves = Array.isArray(persistedSession?.openingMoves)
@@ -69,7 +72,7 @@ export function getInitialSessionState() {
     : getDefaultEngineForPlatform(runtimePlatform);
   const selectedEngine = isEngineAvailableOnPlatform(requestedEngine, runtimePlatform)
     ? requestedEngine
-    : getDefaultEngineForPlatform(runtimePlatform);
+    : getDefaultEngineForPlatform(runtimePlatform) || "stockfish";
   const evaluation =
     persistedSession?.evaluation &&
     (persistedSession.evaluation.type === "cp" ||
@@ -118,6 +121,7 @@ export function getInitialSessionState() {
       openingMoves.length > moveIndex &&
       !isPlayerTurnInOpening(moveIndex, playerColor),
     needsResumeEngineMove:
+      hasEngineSupport &&
       (mode === "play" || mode === "free") &&
       !isPlayerTurnInGame(restoredGame, playerColor)
   };
