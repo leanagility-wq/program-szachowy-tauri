@@ -7,6 +7,9 @@ use std::os::unix::fs::PermissionsExt;
 use tauri::Manager;
 
 const OPENINGS_DB_BYTES: &[u8] = include_bytes!("../resources/db/openings.db");
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
+const STOCKFISH_ANDROID_ARM64_BYTES: &[u8] =
+    include_bytes!("../resources/engines/android/arm64-v8a/stockfish");
 
 fn get_resource_path(app: &tauri::AppHandle, parts: &[&str]) -> Result<PathBuf, String> {
     let mut path = app
@@ -181,17 +184,10 @@ fn prepare_android_stockfish_binary(app: &tauri::AppHandle) -> Result<PathBuf, S
 
     ensure_parent_dir(&writable_path, "silnika Android")?;
 
-    let source_path = get_dev_path(&["resources", "engines", "android", abi_dir, "stockfish"]);
-    if !source_path.exists() {
-        return Err(format!(
-            "Brak androidowej binarki Stockfisha dla ABI {abi_dir}. Dodaj plik do src-tauri/resources/engines/android/{abi_dir}/stockfish i przebuduj APK."
-        ));
-    }
-
-    fs::copy(&source_path, &writable_path).map_err(|error| {
+    let bytes = get_android_stockfish_bytes(abi_dir)?;
+    fs::write(&writable_path, bytes).map_err(|error| {
         format!(
-            "Nie udało się skopiować androidowego Stockfisha {} do {}: {error}",
-            source_path.display(),
+            "Nie udało się zapisać androidowego Stockfisha {}: {error}",
             writable_path.display()
         )
     })?;
@@ -199,6 +195,21 @@ fn prepare_android_stockfish_binary(app: &tauri::AppHandle) -> Result<PathBuf, S
     ensure_android_executable_permissions(&writable_path)?;
 
     Ok(writable_path)
+}
+
+#[cfg(target_os = "android")]
+fn get_android_stockfish_bytes(_abi_dir: &str) -> Result<&'static [u8], String> {
+    #[cfg(target_arch = "aarch64")]
+    {
+        return Ok(STOCKFISH_ANDROID_ARM64_BYTES);
+    }
+
+    #[cfg(not(target_arch = "aarch64"))]
+    {
+        Err(format!(
+            "Brak wbudowanej binarki Stockfisha dla tego ABI. Dodaj odpowiedni plik do src-tauri/resources/engines/android/<abi>/stockfish i przebuduj APK."
+        ))
+    }
 }
 
 #[cfg(target_os = "android")]
