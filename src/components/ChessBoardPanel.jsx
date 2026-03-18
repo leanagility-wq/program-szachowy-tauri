@@ -165,7 +165,7 @@ function ChessBoardPanel({
               type="button"
               className="app-button danger mobile-undo-button"
               onClick={onUndoLastMovePair}
-              disabled={mode !== "play" || isEngineThinking || isEngineMoveScheduled}
+              disabled={isEngineThinking || isEngineMoveScheduled}
             >
               {t("control.undoMove")}
             </button>
