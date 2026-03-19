@@ -58,6 +58,7 @@ export function useChessTrainer() {
   const [selectedSquare, setSelectedSquare] = useState("");
   const [captureAnimationSquare, setCaptureAnimationSquare] = useState("");
   const selectedEngineLabel = getEngineLabel(selectedEngine);
+  const boardAnimationDurationMs = 300;
 
   const setFen = useCallback((nextFen) => {
     setSelectedSquare("");
@@ -156,6 +157,9 @@ export function useChessTrainer() {
       return;
     }
 
+    const hideStartDelayMs = Math.round(boardAnimationDurationMs * 0.28);
+    const hideDurationMs = Math.round(boardAnimationDurationMs * 0.52);
+
     if (captureAnimationStartTimeoutRef.current) {
       clearTimeout(captureAnimationStartTimeoutRef.current);
       captureAnimationStartTimeoutRef.current = null;
@@ -173,13 +177,17 @@ export function useChessTrainer() {
       captureAnimationTimeoutRef.current = window.setTimeout(() => {
         captureAnimationTimeoutRef.current = null;
         setCaptureAnimationSquare("");
-      }, 145);
-    }, 45);
-  }, [runtimePlatform]);
+      }, hideDurationMs);
+    }, hideStartDelayMs);
+  }, [boardAnimationDurationMs, runtimePlatform]);
 
   const scheduleAfterBoardAnimation = useCallback((callback, delayMs) => {
     const resolvedDelay =
-      typeof delayMs === "number" ? delayMs : runtimePlatform === "android" ? 140 : 0;
+      typeof delayMs === "number"
+        ? delayMs
+        : runtimePlatform === "android"
+          ? Math.round(boardAnimationDurationMs * 0.47)
+          : 0;
 
     if (resolvedDelay <= 0 || typeof window === "undefined") {
       callback();
@@ -192,7 +200,7 @@ export function useChessTrainer() {
     }, resolvedDelay);
 
     postMoveUiTimeoutsRef.current.add(timeoutId);
-  }, [runtimePlatform]);
+  }, [boardAnimationDurationMs, runtimePlatform]);
 
   const runLowPriorityUiUpdate = useCallback((callback, delayMs) => {
     scheduleAfterBoardAnimation(() => {
@@ -510,6 +518,7 @@ export function useChessTrainer() {
     id: "OpeningTrainerBoard",
     position: fen,
     boardWidth: 400,
+    animationDurationInMs: boardAnimationDurationMs,
     boardOrientation: playerColor,
     arrows: boardArrows,
     customSquareStyles,
@@ -521,7 +530,15 @@ export function useChessTrainer() {
     },
     onPieceDrop: handlePieceDrop,
     onSquareClick: handleSquareClick
-  }), [boardArrows, customSquareStyles, fen, handlePieceDrop, handleSquareClick, playerColor]);
+  }), [
+    boardAnimationDurationMs,
+    boardArrows,
+    customSquareStyles,
+    fen,
+    handlePieceDrop,
+    handleSquareClick,
+    playerColor
+  ]);
 
   const getVisibleHint = useCallback(() => {
     return showHint ? hint || "-" : "-";
