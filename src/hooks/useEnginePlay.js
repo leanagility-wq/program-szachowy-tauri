@@ -5,6 +5,7 @@ import { getEngineLabel } from "../constants/engines";
 import { useI18n } from "../i18n";
 
 export function useEnginePlay({
+  runtimePlatform,
   playerColor,
   selectedEngine,
   engineElo,
@@ -17,7 +18,9 @@ export function useEnginePlay({
   setBestMove,
   setBestMoves,
   setIsEngineThinking,
-  setEvaluation
+  setEvaluation,
+  scheduleAfterBoardAnimation,
+  runLowPriorityUiUpdate
 }) {
   const { t } = useI18n();
   const engineMoveTimeoutRef = useRef(null);
@@ -130,8 +133,12 @@ export function useEnginePlay({
       }
 
       setFen(gameRef.current.fen());
-      setStatus(t("engine.playedMove", { engineLabel, move: bestMoveUci }));
-      await refreshEvaluation(gameRef.current.fen());
+      runLowPriorityUiUpdate(() => {
+        setStatus(t("engine.playedMove", { engineLabel, move: bestMoveUci }));
+      });
+      scheduleAfterBoardAnimation(() => {
+        refreshEvaluation(gameRef.current.fen());
+      });
     } catch (error) {
       console.error(error);
       setStatus(t("engine.playMoveError", { engineLabel }));
@@ -166,14 +173,18 @@ export function useEnginePlay({
 
   function handlePlayModeMove() {
     setFen(gameRef.current.fen());
-    setHint("");
-    setShowHint(false);
-    setBestMoves([]);
-    setBestMove("");
-    setStatus(t("engine.waitResponse", { engineLabel }));
-    refreshEvaluation(gameRef.current.fen());
+    runLowPriorityUiUpdate(() => {
+      setHint("");
+      setShowHint(false);
+      setBestMoves([]);
+      setBestMove("");
+      setStatus(t("engine.waitResponse", { engineLabel }));
+    });
+    scheduleAfterBoardAnimation(() => {
+      refreshEvaluation(gameRef.current.fen());
+    });
 
-    scheduleEngineMove(300);
+    scheduleEngineMove(runtimePlatform === "android" ? 220 : 300);
 
     return true;
   }
@@ -209,12 +220,16 @@ export function useEnginePlay({
     }
 
     setFen(gameRef.current.fen());
-    setStatus(t("engine.undoSuccess"));
-    setHint("");
-    setShowHint(false);
-    setBestMoves([]);
-    setBestMove("");
-    refreshEvaluation(gameRef.current.fen());
+    runLowPriorityUiUpdate(() => {
+      setStatus(t("engine.undoSuccess"));
+      setHint("");
+      setShowHint(false);
+      setBestMoves([]);
+      setBestMove("");
+    });
+    scheduleAfterBoardAnimation(() => {
+      refreshEvaluation(gameRef.current.fen());
+    }, 80);
   }
 
   return {

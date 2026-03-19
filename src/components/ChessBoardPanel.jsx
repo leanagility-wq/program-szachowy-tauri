@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import ControlPanel from "./ControlPanel";
 import EvaluationBar from "./EvaluationBar";
@@ -31,16 +31,17 @@ function ChessBoardPanel({
   const [isEvaluationVisible, setIsEvaluationVisible] = useState(true);
   const [boardWidth, setBoardWidth] = useState(480);
   const boardWrapRef = useRef(null);
+  const mobileCanDragPiece = useCallback(() => false, []);
 
-  function getMobileSquareStateClass(square) {
+  const getMobileSquareStateClass = useCallback((square) => {
     if (square === selectedSquare) {
       return "mobile-square-click-target is-selected";
     }
 
     return "mobile-square-click-target";
-  }
+  }, [selectedSquare]);
 
-  function renderMobileSquare({ square, piece, children }) {
+  const renderMobileSquare = useCallback(({ square, piece, children }) => {
     return (
       <div className="mobile-square-click-target-wrap">
         {children}
@@ -56,7 +57,7 @@ function ChessBoardPanel({
         />
       </div>
     );
-  }
+  }, [chessboardOptions, getMobileSquareStateClass]);
 
   useEffect(() => {
     function updateBoardWidth() {
@@ -95,6 +96,15 @@ function ChessBoardPanel({
       window.removeEventListener("resize", updateBoardWidth);
     };
   }, [isEvaluationVisible]);
+
+  const resolvedChessboardOptions = useMemo(() => ({
+    ...chessboardOptions,
+    allowDragging: !isMobileLayout,
+    canDragPiece: isMobileLayout ? mobileCanDragPiece : chessboardOptions.canDragPiece,
+    onSquareClick: isMobileLayout ? chessboardOptions.onSquareClick : undefined,
+    squareRenderer: isMobileLayout ? renderMobileSquare : undefined,
+    boardWidth
+  }), [boardWidth, chessboardOptions, isMobileLayout, mobileCanDragPiece, renderMobileSquare]);
 
   return (
     <section className="board-panel">
@@ -144,14 +154,7 @@ function ChessBoardPanel({
         <div className="board-wrap" ref={boardWrapRef}>
           <div className="board-box" style={{ width: `${boardWidth}px` }}>
             <Chessboard
-              options={{
-                ...chessboardOptions,
-                allowDragging: !isMobileLayout,
-                canDragPiece: isMobileLayout ? () => false : chessboardOptions.canDragPiece,
-                onSquareClick: isMobileLayout ? chessboardOptions.onSquareClick : undefined,
-                squareRenderer: isMobileLayout ? renderMobileSquare : undefined,
-                boardWidth
-              }}
+              options={resolvedChessboardOptions}
             />
           </div>
         </div>
@@ -176,4 +179,4 @@ function ChessBoardPanel({
   );
 }
 
-export default ChessBoardPanel;
+export default memo(ChessBoardPanel);

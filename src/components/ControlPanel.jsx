@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useI18n } from "../i18n";
 import {
   ENGINE_ELO_OPTIONS,
@@ -171,4 +171,4 @@ function ControlPanel({
   );
 }
 
-export default ControlPanel;
+export default memo(ControlPanel);

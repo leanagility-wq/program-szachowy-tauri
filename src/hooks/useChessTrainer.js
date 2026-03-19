@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import { fetchOpenings, fetchOpeningById } from "../services/api";
 import {
@@ -21,14 +21,18 @@ import { getRuntimePlatform } from "../platform/runtime";
 
 export function useChessTrainer() {
   const { t } = useI18n();
-  const hasEngineSupport = hasEngineSupportOnPlatform(getRuntimePlatform());
+  const runtimePlatform = getRuntimePlatform();
+  const hasEngineSupport = hasEngineSupportOnPlatform(runtimePlatform);
   const [initialSession] = useState(getInitialSessionState);
   const gameRef = useRef(new Chess(initialSession.fen));
   const openingMoveTimeoutRef = useRef(null);
+  const openingTrainingRef = useRef(null);
+  const postMoveUiTimeoutsRef = useRef(new Set());
   const clearAllAsyncWorkRef = useRef(() => {});
   const hasHydratedSessionRef = useRef(true);
   const needsResumeOpeningMoveRef = useRef(initialSession.needsResumeOpeningMove);
   const needsResumeEngineMoveRef = useRef(initialSession.needsResumeEngineMove);
+  const persistTimeoutRef = useRef(null);
 
   const [fen, setFenState] = useState(initialSession.fen);
   const [openingsList, setOpeningsList] = useState([]);
@@ -50,12 +54,10 @@ export function useChessTrainer() {
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [evaluation, setEvaluation] = useState(initialSession.evaluation);
   const [selectedSquare, setSelectedSquare] = useState("");
-  const [, setLegalTargetSquares] = useState([]);
   const selectedEngineLabel = getEngineLabel(selectedEngine);
 
   const setFen = useCallback((nextFen) => {
     setSelectedSquare("");
-    setLegalTargetSquares([]);
     setFenState(nextFen);
   }, []);
 
@@ -124,7 +126,39 @@ export function useChessTrainer() {
     [clearScheduledOpeningMove]
   );
 
+  const clearScheduledPostMoveUiWork = useCallback(() => {
+    for (const timeoutId of postMoveUiTimeoutsRef.current) {
+      clearTimeout(timeoutId);
+    }
+
+    postMoveUiTimeoutsRef.current.clear();
+  }, []);
+
+  const scheduleAfterBoardAnimation = useCallback((callback, delayMs) => {
+    const resolvedDelay =
+      typeof delayMs === "number" ? delayMs : runtimePlatform === "android" ? 140 : 0;
+
+    if (resolvedDelay <= 0 || typeof window === "undefined") {
+      callback();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      postMoveUiTimeoutsRef.current.delete(timeoutId);
+      callback();
+    }, resolvedDelay);
+
+    postMoveUiTimeoutsRef.current.add(timeoutId);
+  }, [runtimePlatform]);
+
+  const runLowPriorityUiUpdate = useCallback((callback, delayMs) => {
+    scheduleAfterBoardAnimation(() => {
+      startTransition(callback);
+    }, delayMs);
+  }, [scheduleAfterBoardAnimation]);
+
   const engine = useEnginePlay({
+    runtimePlatform,
     playerColor,
     selectedEngine,
     engineElo,
@@ -137,7 +171,9 @@ export function useChessTrainer() {
     setBestMove,
     setBestMoves,
     setIsEngineThinking,
-    setEvaluation
+    setEvaluation,
+    scheduleAfterBoardAnimation,
+    runLowPriorityUiUpdate
   });
 
   const freeOpeningTraining = useFreeOpeningTraining({
@@ -160,16 +196,16 @@ export function useChessTrainer() {
     resetAnalysis: resetFreeOpeningAnalysis
   } = freeOpeningTraining;
 
-  function clearAllAsyncWork() {
+  const clearAllAsyncWork = useCallback(() => {
     clearScheduledOpeningMove();
+    clearScheduledPostMoveUiWork();
     engine.clearScheduledEngineMove();
     engine.invalidatePendingAsyncWork();
-  }
+  }, [clearScheduledOpeningMove, clearScheduledPostMoveUiWork, engine]);
 
-  function clearSquareSelection() {
+  const clearSquareSelection = useCallback(() => {
     setSelectedSquare("");
-    setLegalTargetSquares([]);
-  }
+  }, []);
 
   useEffect(() => {
     clearAllAsyncWorkRef.current = clearAllAsyncWork;
@@ -181,7 +217,7 @@ export function useChessTrainer() {
     };
   }, []);
 
-  function resetSessionState() {
+  const resetSessionState = useCallback(() => {
     clearAllAsyncWork();
     clearSquareSelection();
 
@@ -196,9 +232,9 @@ export function useChessTrainer() {
     setEvaluation({ type: "cp", value: 0 });
     setCorrectCount(0);
     setWrongCount(0);
-  }
+  }, [clearAllAsyncWork, clearSquareSelection, setFen]);
 
-  function startOpeningFromBeginning(moves, openingLabel) {
+  const startOpeningFromBeginning = useCallback((moves, openingLabel) => {
     engine.refreshEvaluation(gameRef.current.fen());
 
     if (playerColor === "white") {
@@ -211,9 +247,9 @@ export function useChessTrainer() {
     setStatus(t("trainer.programStarts", { openingLabel }));
 
     scheduleOpeningComputerMove(() => {
-      openingTraining.playOpeningComputerMove(0, moves);
+      openingTrainingRef.current?.playOpeningComputerMove(0, moves);
     }, 400);
-  }
+  }, [engine, playerColor, scheduleOpeningComputerMove, t]);
 
   const openingTraining = useOpeningTraining({
     engineLabel: selectedEngineLabel,
@@ -232,8 +268,14 @@ export function useChessTrainer() {
     refreshEvaluation: engine.refreshEvaluation,
     enterPlayMode: (customStatus) => engine.enterPlayMode(customStatus, setMode),
     scheduleOpeningComputerMove,
-    clearScheduledOpeningMove
+    clearScheduledOpeningMove,
+    scheduleAfterBoardAnimation,
+    runLowPriorityUiUpdate
   });
+
+  useEffect(() => {
+    openingTrainingRef.current = openingTraining;
+  }, [openingTraining]);
 
   useEffect(() => {
     if (!needsResumeOpeningMoveRef.current) {
@@ -255,7 +297,7 @@ export function useChessTrainer() {
     engine.scheduleEngineMove(300);
   }, [engine]);
 
-  function canPlayerAct() {
+  const canPlayerAct = useCallback(() => {
     if (isEngineThinking || engine.isEngineMoveScheduled) {
       setStatus(t("trainer.waitEngineMove", { engineLabel: selectedEngineLabel }));
       return false;
@@ -276,9 +318,17 @@ export function useChessTrainer() {
     }
 
     return true;
-  }
+  }, [
+    engine.isEngineMoveScheduled,
+    isEngineThinking,
+    mode,
+    moveIndex,
+    playerColor,
+    selectedEngineLabel,
+    t
+  ]);
 
-  function isOwnPieceSquare(square) {
+  const isOwnPieceSquare = useCallback((square) => {
     const piece = gameRef.current.get(square);
     if (!piece) {
       return false;
@@ -288,25 +338,17 @@ export function useChessTrainer() {
       (playerColor === "white" && piece.color === "w") ||
       (playerColor === "black" && piece.color === "b")
     );
-  }
+  }, [playerColor]);
 
-  function selectSquare(square) {
+  const selectSquare = useCallback((square) => {
     if (!canPlayerAct() || !isOwnPieceSquare(square)) {
       return;
     }
 
-    const legalTargets = gameRef.current
-      .moves({
-        square,
-        verbose: true
-      })
-      .map((move) => move.to);
-
     setSelectedSquare(square);
-    setLegalTargetSquares(legalTargets);
-  }
+  }, [canPlayerAct, isOwnPieceSquare]);
 
-  function tryPlayerMove(sourceSquare, targetSquare) {
+  const tryPlayerMove = useCallback((sourceSquare, targetSquare) => {
     if (!canPlayerAct()) {
       return false;
     }
@@ -343,14 +385,14 @@ export function useChessTrainer() {
     }
 
     return engine.handlePlayModeMove();
-  }
+  }, [analyzeFreeOpeningMove, canPlayerAct, clearSquareSelection, engine, mode, openingTraining]);
 
-  function handlePieceDrop(event) {
+  const handlePieceDrop = useCallback((event) => {
     const { sourceSquare, targetSquare } = event;
     return tryPlayerMove(sourceSquare, targetSquare);
-  }
+  }, [tryPlayerMove]);
 
-  function handleSquareClick({ square }) {
+  const handleSquareClick = useCallback(({ square }) => {
     if (!square) {
       return;
     }
@@ -371,7 +413,7 @@ export function useChessTrainer() {
     }
 
     tryPlayerMove(selectedSquare, square);
-  }
+  }, [clearSquareSelection, isOwnPieceSquare, selectSquare, selectedSquare, tryPlayerMove]);
 
   const boardArrows = useMemo(() => {
     if (mode === "opening" && showHint && hint) {
@@ -406,7 +448,7 @@ export function useChessTrainer() {
     return styles;
   }, [mode, bookMoveSquare, selectedSquare]);
 
-  const chessboardOptions = {
+  const chessboardOptions = useMemo(() => ({
     id: "OpeningTrainerBoard",
     position: fen,
     boardWidth: 400,
@@ -421,13 +463,13 @@ export function useChessTrainer() {
     },
     onPieceDrop: handlePieceDrop,
     onSquareClick: handleSquareClick
-  };
+  }), [boardArrows, customSquareStyles, fen, handlePieceDrop, handleSquareClick, playerColor]);
 
-  function getVisibleHint() {
+  const getVisibleHint = useCallback(() => {
     return showHint ? hint || "-" : "-";
-  }
+  }, [hint, showHint]);
 
-  async function loadOpening() {
+  const loadOpening = useCallback(async () => {
     if (!effectiveSelectedOpeningId) {
       return;
     }
@@ -449,7 +491,7 @@ export function useChessTrainer() {
       console.error(error);
       setStatus(t("trainer.fetchOpeningError"));
     }
-  }
+  }, [effectiveSelectedOpeningId, resetSessionState, startOpeningFromBeginning, t]);
 
   function resetTraining() {
     if (mode === "free") {
@@ -461,7 +503,7 @@ export function useChessTrainer() {
     startOpeningFromBeginning(openingMoves, t("trainer.trainingReset"));
   }
 
-  function startFreeTraining() {
+  const startFreeTraining = useCallback(() => {
     if (!hasEngineSupport) {
       setStatus(t("trainer.freeTrainingUnavailable"));
       return;
@@ -481,16 +523,24 @@ export function useChessTrainer() {
     if (!isPlayerTurnInGame(gameRef.current, playerColor)) {
       engine.scheduleEngineMove(300);
     }
-  }
+  }, [
+    engine,
+    hasEngineSupport,
+    playerColor,
+    resetFreeOpeningAnalysis,
+    resetSessionState,
+    selectedEngineLabel,
+    t
+  ]);
 
-  function showCurrentHint() {
+  const showCurrentHint = useCallback(() => {
     if (openingTraining.canShowHint(mode)) {
       setShowHint(true);
       setStatus(t("trainer.nextRepertoireMove"));
     }
-  }
+  }, [mode, openingTraining, t]);
 
-  function handleRequestHint() {
+  const handleRequestHint = useCallback(() => {
     if (mode === "opening") {
       showCurrentHint();
       return;
@@ -502,7 +552,7 @@ export function useChessTrainer() {
     }
 
     engine.handleGetBestMove();
-  }
+  }, [engine, hasEngineSupport, mode, showCurrentHint, t]);
 
   const displayedOpeningName = mode === "free" ? freeOpeningLabel : openingName;
   const displayedCorrectCount = mode === "free" ? freeGoodCount : correctCount;
@@ -516,28 +566,41 @@ export function useChessTrainer() {
       return;
     }
 
-    persistSessionSnapshot(
-      {
-        fen,
-        selectedOpeningId: effectiveSelectedOpeningId,
-        openingMoves,
-        openingName: displayedOpeningName,
-        playerColor,
-        moveIndex,
-        hint,
-        showHint,
-        status,
-        bestMove,
-        bestMoves,
-        correctCount: displayedCorrectCount,
-        wrongCount: displayedWrongCount,
-        mode,
-        selectedEngine,
-        engineElo,
-        evaluation
-      },
-      t("trainer.sessionSaveError")
-    );
+    if (persistTimeoutRef.current) {
+      clearTimeout(persistTimeoutRef.current);
+    }
+
+    persistTimeoutRef.current = setTimeout(() => {
+      persistSessionSnapshot(
+        {
+          fen,
+          selectedOpeningId: effectiveSelectedOpeningId,
+          openingMoves,
+          openingName: displayedOpeningName,
+          playerColor,
+          moveIndex,
+          hint,
+          showHint,
+          status,
+          bestMove,
+          bestMoves,
+          correctCount: displayedCorrectCount,
+          wrongCount: displayedWrongCount,
+          mode,
+          selectedEngine,
+          engineElo,
+          evaluation
+        },
+        t("trainer.sessionSaveError")
+      );
+    }, 180);
+
+    return () => {
+      if (persistTimeoutRef.current) {
+        clearTimeout(persistTimeoutRef.current);
+        persistTimeoutRef.current = null;
+      }
+    };
   }, [
     fen,
     effectiveSelectedOpeningId,

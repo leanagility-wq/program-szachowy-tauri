@@ -18,7 +18,9 @@ export function useOpeningTraining({
   refreshEvaluation,
   enterPlayMode,
   scheduleOpeningComputerMove,
-  clearScheduledOpeningMove
+  clearScheduledOpeningMove,
+  scheduleAfterBoardAnimation,
+  runLowPriorityUiUpdate
 }) {
   const { t } = useI18n();
 
@@ -41,26 +43,28 @@ export function useOpeningTraining({
       const nextIndex = index + 1;
 
       setFen(gameRef.current.fen());
-      setMoveIndex(nextIndex);
-      refreshEvaluation(gameRef.current.fen());
+      runLowPriorityUiUpdate(() => {
+        setMoveIndex(nextIndex);
 
-      if (movesFromArg[nextIndex] && isPlayerTurnInOpening(nextIndex, playerColor)) {
-        setHint(movesFromArg[nextIndex] || "");
-        setShowHint(false);
-      } else {
-        setHint("");
-        setShowHint(false);
-      }
-
-      setStatus(t("opening.programPlayed", { move }));
-
-      if (!movesFromArg[nextIndex]) {
-        if (canContinueWithEngine) {
-          enterPlayMode(t("opening.programPlayedFinished", { move }));
+        if (movesFromArg[nextIndex] && isPlayerTurnInOpening(nextIndex, playerColor)) {
+          setHint(movesFromArg[nextIndex] || "");
+          setShowHint(false);
         } else {
-          setStatus(t("opening.programPlayedFinishedMobile", { move }));
+          setHint("");
+          setShowHint(false);
         }
-      }
+
+        setStatus(t("opening.programPlayed", { move }));
+
+        if (!movesFromArg[nextIndex]) {
+          if (canContinueWithEngine) {
+            enterPlayMode(t("opening.programPlayedFinished", { move }));
+          } else {
+            setStatus(t("opening.programPlayedFinishedMobile", { move }));
+          }
+        }
+      });
+      scheduleAfterBoardAnimation(() => refreshEvaluation(gameRef.current.fen()));
     } catch (error) {
       console.error(error);
       setStatus(t("opening.playMoveError"));
@@ -78,8 +82,10 @@ export function useOpeningTraining({
       }
 
       setFen(gameRef.current.fen());
-      refreshEvaluation(gameRef.current.fen());
-      enterPlayMode(t("opening.lineFinishedContinue", { engineLabel }));
+      runLowPriorityUiUpdate(() => {
+        enterPlayMode(t("opening.lineFinishedContinue", { engineLabel }));
+      });
+      scheduleAfterBoardAnimation(() => refreshEvaluation(gameRef.current.fen()));
       return true;
     }
 
@@ -92,29 +98,29 @@ export function useOpeningTraining({
 
     const nextIndex = moveIndex + 1;
 
-    setCorrectCount((prev) => prev + 1);
     setFen(gameRef.current.fen());
-    setMoveIndex(nextIndex);
-    setStatus(t("opening.correctMove", { move: move.san }));
-    setShowHint(false);
-    refreshEvaluation(gameRef.current.fen());
+    runLowPriorityUiUpdate(() => {
+      setCorrectCount((prev) => prev + 1);
+      setMoveIndex(nextIndex);
+      setStatus(t("opening.correctMove", { move: move.san }));
+      setShowHint(false);
 
-    if (openingMoves[nextIndex]) {
-      if (isPlayerTurnInOpening(nextIndex, playerColor)) {
-        setHint(openingMoves[nextIndex] || "");
-      } else {
-        setHint("");
-        scheduleOpeningComputerMove(() => {
-          playOpeningComputerMove(nextIndex, openingMoves);
-        }, 400);
-      }
-    } else {
-      if (canContinueWithEngine) {
+      if (openingMoves[nextIndex]) {
+        if (isPlayerTurnInOpening(nextIndex, playerColor)) {
+          setHint(openingMoves[nextIndex] || "");
+        } else {
+          setHint("");
+          scheduleOpeningComputerMove(() => {
+            playOpeningComputerMove(nextIndex, openingMoves);
+          }, 400);
+        }
+      } else if (canContinueWithEngine) {
         enterPlayMode(t("opening.correctMoveFinished", { move: move.san }));
       } else {
         setStatus(t("opening.correctMoveFinishedMobile", { move: move.san }));
       }
-    }
+    });
+    scheduleAfterBoardAnimation(() => refreshEvaluation(gameRef.current.fen()));
 
     return true;
   }
