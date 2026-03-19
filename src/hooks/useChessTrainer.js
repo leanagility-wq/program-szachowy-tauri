@@ -14,13 +14,17 @@ import { useFreeOpeningTraining } from "./useFreeOpeningTraining";
 import { getEngineLabel, hasEngineSupportOnPlatform } from "../constants/engines";
 import { useI18n } from "../i18n";
 import {
+  getLocalizedOpeningName,
+  localizeOpenings
+} from "../features/openings/openingLocalization";
+import {
   getInitialSessionState,
   persistSessionSnapshot
 } from "../features/trainer/sessionState";
 import { getRuntimePlatform } from "../platform/runtime";
 
 export function useChessTrainer() {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const runtimePlatform = getRuntimePlatform();
   const hasEngineSupport = hasEngineSupportOnPlatform(runtimePlatform);
   const [initialSession] = useState(getInitialSessionState);
@@ -95,9 +99,14 @@ export function useChessTrainer() {
     };
   }, [t]);
 
+  const localizedOpeningsList = useMemo(
+    () => localizeOpenings(openingsList, language),
+    [language, openingsList]
+  );
+
   const filteredOpenings = useMemo(() => {
-    return openingsList.filter((opening) => opening.side === playerColor);
-  }, [openingsList, playerColor]);
+    return localizedOpeningsList.filter((opening) => opening.side === playerColor);
+  }, [localizedOpeningsList, playerColor]);
 
   const effectiveSelectedOpeningId = useMemo(() => {
     if (filteredOpenings.length === 0) {
@@ -565,12 +574,16 @@ export function useChessTrainer() {
     try {
       const data = await fetchOpeningById(openingId);
       const moves = data.moves || [];
-      const loadedOpeningName = data.name || t("trainer.unnamedOpening");
+      const rawOpeningName = data.name || t("trainer.unnamedOpening");
+      const loadedOpeningName = getLocalizedOpeningName(
+        { id: openingId, name: rawOpeningName },
+        language
+      );
 
       resetSessionState();
       setSelectedOpeningId(openingId);
       setOpeningMoves(moves);
-      setOpeningName(loadedOpeningName);
+      setOpeningName(rawOpeningName);
 
       startOpeningFromBeginning(
         moves,
@@ -580,7 +593,7 @@ export function useChessTrainer() {
       console.error(error);
       setStatus(t("trainer.fetchOpeningError"));
     }
-  }, [effectiveSelectedOpeningId, resetSessionState, startOpeningFromBeginning, t]);
+  }, [effectiveSelectedOpeningId, language, resetSessionState, startOpeningFromBeginning, t]);
 
   function resetTraining() {
     if (mode === "free") {
@@ -643,7 +656,20 @@ export function useChessTrainer() {
     engine.handleGetBestMove();
   }, [engine, hasEngineSupport, mode, showCurrentHint, t]);
 
-  const displayedOpeningName = mode === "free" ? freeOpeningLabel : openingName;
+  const displayedOpeningName = useMemo(() => {
+    if (mode === "free") {
+      return freeOpeningLabel;
+    }
+
+    if (!openingName) {
+      return "";
+    }
+
+    return getLocalizedOpeningName(
+      { id: effectiveSelectedOpeningId, name: openingName },
+      language
+    );
+  }, [effectiveSelectedOpeningId, freeOpeningLabel, language, mode, openingName]);
   const displayedCorrectCount = mode === "free" ? freeGoodCount : correctCount;
   const displayedWrongCount = mode === "free" ? freeWrongCount : wrongCount;
   const displayedTotalAttempts = mode === "free" ? freeTotalAttempts : totalAttempts;

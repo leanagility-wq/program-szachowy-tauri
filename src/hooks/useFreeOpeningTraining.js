@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { fetchOpeningById, fetchOpeningMoveAnalysis } from "../services/api";
 import { useI18n } from "../i18n";
+import { getLocalizedOpeningName } from "../features/openings/openingLocalization";
 
 const MAX_SCORING_MOVES = 5;
 
-function getOpeningLabel(t, matchingOpenings, historyLength, isLoadingCatalog) {
+function getOpeningLabel(t, matchingOpenings, historyLength, isLoadingCatalog, language) {
   if (isLoadingCatalog) {
     return t("free.loadingCatalog");
   }
@@ -18,10 +19,12 @@ function getOpeningLabel(t, matchingOpenings, historyLength, isLoadingCatalog) {
   }
 
   if (matchingOpenings.length === 1) {
-    return matchingOpenings[0].name;
+    return getLocalizedOpeningName(matchingOpenings[0], language);
   }
 
-  const names = matchingOpenings.slice(0, 3).map((opening) => opening.name);
+  const names = matchingOpenings
+    .slice(0, 3)
+    .map((opening) => getLocalizedOpeningName(opening, language));
   const suffix = matchingOpenings.length > 3 ? "..." : "";
   return t("free.possibleOpenings", { names: `${names.join(" / ")}${suffix}` });
 }
@@ -51,7 +54,7 @@ export function useFreeOpeningTraining({
   fen,
   scheduleAfterBoardAnimation
 }) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const [openingCatalog, setOpeningCatalog] = useState([]);
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
   const [scoreEntries, setScoreEntries] = useState([]);
@@ -133,8 +136,8 @@ export function useFreeOpeningTraining({
       history.every((move, index) => opening.moves[index] === move)
     );
 
-    return getOpeningLabel(t, matchingOpenings, history.length, isLoadingCatalog);
-  }, [fen, gameRef, isLoadingCatalog, mode, openingCatalog, t]);
+    return getOpeningLabel(t, matchingOpenings, history.length, isLoadingCatalog, language);
+  }, [fen, gameRef, isLoadingCatalog, language, mode, openingCatalog, t]);
 
   const analyzePlayerMove = useCallback(
     async ({ fenBeforeMove, move, historyAfterMove }) => {
