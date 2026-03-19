@@ -28,6 +28,7 @@ export function useChessTrainer() {
   const openingMoveTimeoutRef = useRef(null);
   const openingTrainingRef = useRef(null);
   const postMoveUiTimeoutsRef = useRef(new Set());
+  const captureAnimationTimeoutRef = useRef(null);
   const clearAllAsyncWorkRef = useRef(() => {});
   const hasHydratedSessionRef = useRef(true);
   const needsResumeOpeningMoveRef = useRef(initialSession.needsResumeOpeningMove);
@@ -54,6 +55,7 @@ export function useChessTrainer() {
   const [isEngineThinking, setIsEngineThinking] = useState(false);
   const [evaluation, setEvaluation] = useState(initialSession.evaluation);
   const [selectedSquare, setSelectedSquare] = useState("");
+  const [captureAnimationSquare, setCaptureAnimationSquare] = useState("");
   const selectedEngineLabel = getEngineLabel(selectedEngine);
 
   const setFen = useCallback((nextFen) => {
@@ -134,6 +136,31 @@ export function useChessTrainer() {
     postMoveUiTimeoutsRef.current.clear();
   }, []);
 
+  const clearCaptureAnimationSquare = useCallback(() => {
+    if (captureAnimationTimeoutRef.current) {
+      clearTimeout(captureAnimationTimeoutRef.current);
+      captureAnimationTimeoutRef.current = null;
+    }
+
+    setCaptureAnimationSquare("");
+  }, []);
+
+  const markCaptureAnimationSquare = useCallback((square) => {
+    if (!square || runtimePlatform !== "android") {
+      return;
+    }
+
+    if (captureAnimationTimeoutRef.current) {
+      clearTimeout(captureAnimationTimeoutRef.current);
+    }
+
+    setCaptureAnimationSquare(square);
+    captureAnimationTimeoutRef.current = window.setTimeout(() => {
+      captureAnimationTimeoutRef.current = null;
+      setCaptureAnimationSquare("");
+    }, 170);
+  }, [runtimePlatform]);
+
   const scheduleAfterBoardAnimation = useCallback((callback, delayMs) => {
     const resolvedDelay =
       typeof delayMs === "number" ? delayMs : runtimePlatform === "android" ? 140 : 0;
@@ -173,7 +200,8 @@ export function useChessTrainer() {
     setIsEngineThinking,
     setEvaluation,
     scheduleAfterBoardAnimation,
-    runLowPriorityUiUpdate
+    runLowPriorityUiUpdate,
+    markCaptureAnimationSquare
   });
 
   const freeOpeningTraining = useFreeOpeningTraining({
@@ -199,9 +227,10 @@ export function useChessTrainer() {
   const clearAllAsyncWork = useCallback(() => {
     clearScheduledOpeningMove();
     clearScheduledPostMoveUiWork();
+    clearCaptureAnimationSquare();
     engine.clearScheduledEngineMove();
     engine.invalidatePendingAsyncWork();
-  }, [clearScheduledOpeningMove, clearScheduledPostMoveUiWork, engine]);
+  }, [clearCaptureAnimationSquare, clearScheduledOpeningMove, clearScheduledPostMoveUiWork, engine]);
 
   const clearSquareSelection = useCallback(() => {
     setSelectedSquare("");
@@ -270,7 +299,8 @@ export function useChessTrainer() {
     scheduleOpeningComputerMove,
     clearScheduledOpeningMove,
     scheduleAfterBoardAnimation,
-    runLowPriorityUiUpdate
+    runLowPriorityUiUpdate,
+    markCaptureAnimationSquare
   });
 
   useEffect(() => {
@@ -370,6 +400,10 @@ export function useChessTrainer() {
       return false;
     }
 
+    if (move.captured && !move.flags?.includes("e")) {
+      markCaptureAnimationSquare(targetSquare);
+    }
+
     clearSquareSelection();
 
     if (mode === "opening") {
@@ -385,7 +419,15 @@ export function useChessTrainer() {
     }
 
     return engine.handlePlayModeMove();
-  }, [analyzeFreeOpeningMove, canPlayerAct, clearSquareSelection, engine, mode, openingTraining]);
+  }, [
+    analyzeFreeOpeningMove,
+    canPlayerAct,
+    clearSquareSelection,
+    engine,
+    markCaptureAnimationSquare,
+    mode,
+    openingTraining
+  ]);
 
   const handlePieceDrop = useCallback((event) => {
     const { sourceSquare, targetSquare } = event;
@@ -637,6 +679,7 @@ export function useChessTrainer() {
     isEngineMoveScheduled: engine.isEngineMoveScheduled,
     evaluation,
     selectedSquare,
+    captureAnimationSquare,
     chessboardOptions,
     openingName: displayedOpeningName,
     moveIndex,

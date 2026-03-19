@@ -390,6 +390,10 @@ input {
   height: 100%;
 }
 
+.mobile-square-click-target-wrap.is-capture-animation-target [data-piece] {
+  opacity: 0;
+}
+
 .mobile-square-click-target {
   position: absolute;
   inset: 0;

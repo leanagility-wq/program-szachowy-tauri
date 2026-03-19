@@ -24,6 +24,7 @@ function ChessBoardPanel({
   isEngineMoveScheduled,
   evaluation,
   selectedSquare,
+  captureAnimationSquare,
   chessboardOptions,
   isMobileLayout
 }) {
@@ -42,8 +43,13 @@ function ChessBoardPanel({
   }, [selectedSquare]);
 
   const renderMobileSquare = useCallback(({ square, piece, children }) => {
+    const wrapClassName =
+      square === captureAnimationSquare
+        ? "mobile-square-click-target-wrap is-capture-animation-target"
+        : "mobile-square-click-target-wrap";
+
     return (
-      <div className="mobile-square-click-target-wrap">
+      <div className={wrapClassName}>
         {children}
         <button
           type="button"
@@ -57,7 +63,7 @@ function ChessBoardPanel({
         />
       </div>
     );
-  }, [chessboardOptions, getMobileSquareStateClass]);
+  }, [captureAnimationSquare, chessboardOptions, getMobileSquareStateClass]);
 
   useEffect(() => {
     function updateBoardWidth() {

@@ -20,7 +20,8 @@ export function useOpeningTraining({
   scheduleOpeningComputerMove,
   clearScheduledOpeningMove,
   scheduleAfterBoardAnimation,
-  runLowPriorityUiUpdate
+  runLowPriorityUiUpdate,
+  markCaptureAnimationSquare
 }) {
   const { t } = useI18n();
 
@@ -39,8 +40,12 @@ export function useOpeningTraining({
     }
 
     try {
-      gameRef.current.move(move);
+      const appliedMove = gameRef.current.move(move);
       const nextIndex = index + 1;
+
+      if (appliedMove?.captured && !appliedMove.flags?.includes("e")) {
+        markCaptureAnimationSquare(appliedMove.to);
+      }
 
       setFen(gameRef.current.fen());
       runLowPriorityUiUpdate(() => {

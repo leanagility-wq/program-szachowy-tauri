@@ -20,7 +20,8 @@ export function useEnginePlay({
   setIsEngineThinking,
   setEvaluation,
   scheduleAfterBoardAnimation,
-  runLowPriorityUiUpdate
+  runLowPriorityUiUpdate,
+  markCaptureAnimationSquare
 }) {
   const { t } = useI18n();
   const engineMoveTimeoutRef = useRef(null);
@@ -130,6 +131,10 @@ export function useEnginePlay({
       if (!appliedMove) {
         setStatus(t("engine.illegalMove", { engineLabel, move: bestMoveUci }));
         return;
+      }
+
+      if (appliedMove.captured && !appliedMove.flags?.includes("e")) {
+        markCaptureAnimationSquare(appliedMove.to);
       }
 
       setFen(gameRef.current.fen());

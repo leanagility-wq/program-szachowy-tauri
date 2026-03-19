@@ -142,6 +142,7 @@ function App() {
               isEngineMoveScheduled={trainer.isEngineMoveScheduled}
               evaluation={trainer.evaluation}
               selectedSquare={trainer.selectedSquare}
+              captureAnimationSquare={trainer.captureAnimationSquare}
               chessboardOptions={trainer.chessboardOptions}
               isMobileLayout={isMobileLayout}
             />
