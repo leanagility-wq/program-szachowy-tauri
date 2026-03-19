@@ -35,6 +35,9 @@ export const messages = {
     "control.freeTraining": "Trenuj bez szablonu",
     "control.hideOptions": "Ukryj opcje",
     "control.options": "Opcje",
+    "about.title": "O aplikacji",
+    "about.summary":
+      "Trener Szachowy pomaga ćwiczyć podstawowe otwarcia i grać dalej z lokalnym silnikiem Stockfish na desktopie oraz Androidzie.",
     "session.trainingOpening": "Trening otwarcia",
     "session.trainingFree": "Trening bez szablonu",
     "session.playContinue": "Gra dalej",
@@ -151,6 +154,9 @@ export const messages = {
     "control.freeTraining": "Train without line",
     "control.hideOptions": "Hide options",
     "control.options": "Options",
+    "about.title": "About",
+    "about.summary":
+      "Chess Opening Trainer helps you practice basic openings and continue the game with the local Stockfish engine on desktop and Android.",
     "session.trainingOpening": "Opening training",
     "session.trainingFree": "Free opening training",
     "session.playContinue": "Play on",

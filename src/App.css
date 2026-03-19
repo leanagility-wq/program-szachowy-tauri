@@ -264,6 +264,28 @@ input {
   line-height: 1.4;
 }
 
+.about-card {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 14px;
+  background: rgba(30, 41, 59, 0.52);
+}
+
+.about-card-title {
+  margin: 0 0 6px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.about-card-text {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .app-select {
   width: 100%;
   min-height: 42px;
@@ -524,6 +546,19 @@ input {
   }
 
   .control-label {
+    font-size: 11px;
+  }
+
+  .about-card {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .about-card-title {
+    font-size: 12px;
+  }
+
+  .about-card-text {
     font-size: 11px;
   }
 

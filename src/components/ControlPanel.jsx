@@ -90,6 +90,11 @@ function ControlPanel({
 
       {!hasEngineSupport ? <div className="control-note">{t("control.mobileNoEngine")}</div> : null}
 
+      <div className="about-card">
+        <div className="about-card-title">{t("about.title")}</div>
+        <p className="about-card-text">{t("about.summary")}</p>
+      </div>
+
       {!isMobileLayout ? (
         <div className="button-row">
           <button className="app-button" onClick={onRequestHint}>
