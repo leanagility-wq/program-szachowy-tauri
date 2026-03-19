@@ -32,6 +32,26 @@ Dla tej aplikacji najbezpieczniejsze operacyjnie podejście jest takie:
 - dodać stronę `Open source licenses` albo przynajmniej ekran `Informacje prawne`,
 - przechowywać informację, z którego dokładnie commita i której binarki Stockfisha zbudowano release.
 
+## Linki dla tego projektu
+
+- repozytorium aplikacji:
+  - https://github.com/leanagility-wq/program-szachowy-tauri
+- README projektu:
+  - https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/README.md
+- notatka licencyjna projektu:
+  - https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md
+- notice open source PL:
+  - https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/open-source-notice.pl.md
+- notice open source EN:
+  - https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/open-source-notice.en.md
+
+## Oficjalne linki Stockfisha
+
+- repozytorium Stockfisha:
+  - https://github.com/official-stockfish/Stockfish
+- tekst licencji Stockfisha:
+  - https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
+
 ## Co już można powiedzieć uczciwie
 
 - aplikacja korzysta z lokalnego silnika Stockfish,

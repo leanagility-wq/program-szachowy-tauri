@@ -39,11 +39,13 @@ W obecnej wersji aplikacja:
 ## 4. Silnik szachowy
 
 Aplikacja korzysta z lokalnego silnika szachowego Stockfish uruchamianego na urządzeniu użytkownika. Analiza pozycji i ruchy silnika są wykonywane lokalnie.
-Silnik szachowy: Stockfish
-Licencja: GPL-3.0
-Kod źródłowy: https://github.com/official-stockfish/Stockfish
-Link do licencji:
-https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
+
+Silnik szachowy: Stockfish  
+Licencja: GPL-3.0  
+Kod źródłowy Stockfisha: https://github.com/official-stockfish/Stockfish  
+Link do licencji: https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt  
+Repozytorium aplikacji: https://github.com/leanagility-wq/program-szachowy-tauri  
+Informacje o licencji i źródłach: https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md
 
 ## 5. Uprawnienia i połączenie z internetem
 
@@ -58,8 +60,6 @@ Aplikacja nie jest kierowana specjalnie do dzieci, ale nie zawiera treści przez
 Jeśli w przyszłości aplikacja zacznie zbierać dane, korzystać z analityki, logowania błędów lub usług zewnętrznych, ta polityka zostanie odpowiednio zaktualizowana.
 
 ## 8. Kontakt
-
-Przed publikacją podmień tę sekcję na prawdziwe dane kontaktowe:
 
 - e-mail: fin@o2.pl
 - strona: https://pawelslowikowski.pl/trener-otwarc-szachowy-polityka-prywatnosci/

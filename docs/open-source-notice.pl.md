@@ -13,7 +13,10 @@ Tekst licencji Stockfisha:
 https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
 
 Kod źródłowy tej aplikacji:
-TU_WPISZ_LINK_DO_REPO_APLIKACJI
+https://github.com/leanagility-wq/program-szachowy-tauri
+
+Informacje o licencjach i źródłach:
+https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md
 
 ## Dłuższa wersja do ekranu „O aplikacji” lub strony projektu
 
@@ -28,4 +31,7 @@ Licencja Stockfisha:
 https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
 
 Kod źródłowy tej aplikacji oraz informacje o użytej wersji Stockfisha:
-TU_WPISZ_LINK_DO_REPO_APLIKACJI
+https://github.com/leanagility-wq/program-szachowy-tauri
+
+Plik z informacjami licencyjnymi dla tego projektu:
+https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md

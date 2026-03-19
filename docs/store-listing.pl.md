@@ -32,5 +32,10 @@ Najważniejsze funkcje:
 Aplikacja została zaprojektowana z myślą o wygodnym treningu na telefonie, ale zachowuje też desktopowy charakter projektu źródłowego.
 
 Aplikacja korzysta z lokalnego silnika szachowego Stockfish uruchamianego na urządzeniu użytkownika. Analiza pozycji i ruchy silnika są wykonywane lokalnie.
-Silnik szachowy: Stockfish
-Licencja: GPL-3.0
+
+Silnik szachowy: Stockfish  
+Licencja: GPL-3.0  
+Kod źródłowy aplikacji: https://github.com/leanagility-wq/program-szachowy-tauri  
+Kod źródłowy Stockfisha: https://github.com/official-stockfish/Stockfish  
+Tekst licencji Stockfisha: https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt  
+Informacje o licencji i źródłach: https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md

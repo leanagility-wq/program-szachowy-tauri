@@ -13,9 +13,12 @@ Stockfish license text:
 https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
 
 Source code for this app:
-YOUR_APP_REPOSITORY_URL_HERE
+https://github.com/leanagility-wq/program-szachowy-tauri
 
-## Longer version for an “About” screen or project website
+License and source details:
+https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md
+
+## Longer version for an "About" screen or project website
 
 This app uses the local Stockfish chess engine.
 
@@ -28,4 +31,7 @@ Stockfish license:
 https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
 
 Source code for this app and information about the bundled Stockfish version:
-YOUR_APP_REPOSITORY_URL_HERE
+https://github.com/leanagility-wq/program-szachowy-tauri
+
+Project license notice file:
+https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md
