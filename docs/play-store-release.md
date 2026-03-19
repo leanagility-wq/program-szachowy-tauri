@@ -104,12 +104,19 @@ Dla obecnej funkcji aplikacji najbardziej prawdopodobny wynik to niski rating og
   - najlepiej repo projektu:
     - `https://github.com/leanagility-wq/program-szachowy-tauri`
 - `Privacy policy URL`:
-  - użyj osobnej strony z polityką prywatności, nawet jeśli nie jest stroną główną produktu
+  - EN:
+    - `https://pawelslowikowski.pl/chess-opening-trainer-privacy-policy/`
+  - PL:
+    - `https://pawelslowikowski.pl/trener-otwarc-szachowy-polityka-prywatnosci`
 
 ## Uwagi praktyczne
 
 - GitHub repo może być użyte jako `Developer website`, jeśli nie masz osobnej strony projektu.
 - Link do polityki prywatności powinien nadal prowadzić bezpośrednio do strony z polityką prywatności, a nie do repo albo pliku licencyjnego.
+- Dla wersji angielskiej użyj:
+  - `https://pawelslowikowski.pl/chess-opening-trainer-privacy-policy/`
+- Dla wersji polskiej użyj:
+  - `https://pawelslowikowski.pl/trener-otwarc-szachowy-polityka-prywatnosci`
 - Jeśli później stworzysz osobną stronę produktu, warto rozdzielić:
   - `Developer website` -> strona projektu
   - `Privacy policy URL` -> strona polityki prywatności
