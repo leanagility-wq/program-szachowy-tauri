@@ -139,6 +139,7 @@ function App() {
               filteredOpenings={trainer.filteredOpenings}
               selectedOpeningId={trainer.selectedOpeningId}
               setSelectedOpeningId={trainer.setSelectedOpeningId}
+              openingName={trainer.openingName}
               playerColor={trainer.playerColor}
               setPlayerColor={trainer.setPlayerColor}
               selectedEngine={trainer.selectedEngine}

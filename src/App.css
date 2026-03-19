@@ -179,6 +179,30 @@ input {
   letter-spacing: -0.02em;
 }
 
+.board-opening-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 12px;
+  padding: 6px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.62);
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.board-opening-chip-label {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.board-opening-chip-name {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
 .toolbar-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
@@ -537,6 +561,12 @@ input {
   .app-title {
     font-size: 18px;
     margin-bottom: 8px;
+  }
+
+  .board-opening-chip {
+    margin: -2px 0 10px;
+    padding: 5px 9px;
+    font-size: 11px;
   }
 
   .toolbar-grid,

@@ -8,6 +8,7 @@ function ChessBoardPanel({
   filteredOpenings,
   selectedOpeningId,
   setSelectedOpeningId,
+  openingName,
   playerColor,
   setPlayerColor,
   selectedEngine,
@@ -116,6 +117,13 @@ function ChessBoardPanel({
   return (
     <section className="board-panel">
       <h1 className="app-title">{t("board.title")}</h1>
+
+      {openingName ? (
+        <div className="board-opening-chip">
+          <span className="board-opening-chip-label">{t("control.opening")}</span>
+          <strong className="board-opening-chip-name">{openingName}</strong>
+        </div>
+      ) : null}
 
       <ControlPanel
         filteredOpenings={filteredOpenings}
