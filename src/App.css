@@ -207,7 +207,7 @@ input {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .toolbar-grid-mobile-main {
@@ -276,7 +276,7 @@ input {
 }
 
 .control-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #9ca3af;
 }
@@ -327,7 +327,7 @@ input {
   border-radius: 12px;
   background: #1f2937;
   color: #f9fafb;
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
 }
 
@@ -340,7 +340,7 @@ input {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .button-row-mobile-primary {
@@ -349,12 +349,12 @@ input {
 
 .button-row-mobile-secondary {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
 .button-row-mobile-training {
   grid-template-columns: 1fr;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .button-row-mobile-training-secondary {
@@ -374,7 +374,7 @@ input {
   border-radius: 12px;
   background: #374151;
   color: #f9fafb;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -585,7 +585,7 @@ input {
   }
 
   .control-label {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .about-card {
@@ -610,14 +610,14 @@ input {
     min-height: 38px;
     padding: 8px 10px;
     border-radius: 10px;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .app-select {
     min-height: 38px;
     padding: 8px 10px;
     border-radius: 10px;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .opening-picker-row {
@@ -649,7 +649,7 @@ input {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     order: 1;
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   .mobile-hint-button,
@@ -661,7 +661,7 @@ input {
 .board-analysis-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -673,20 +673,20 @@ input {
 }
 
 .eval-toggle-button {
-  min-height: 36px;
-  padding: 6px 10px;
+  min-height: 38px;
+  padding: 8px 10px;
   border: 1px solid #374151;
-  border-radius: 999px;
-  background: #1f2937;
-  color: #e5e7eb;
-  font-size: 12px;
+  border-radius: 10px;
+  background: #374151;
+  color: #f9fafb;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .eval-toggle-button:hover {
-  background: #374151;
+  background: #4b5563;
 }
 
 .eval-toggle-button:focus {
@@ -700,7 +700,7 @@ input {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 .eval-label {
@@ -792,6 +792,7 @@ input {
   .board-analysis-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
   }
 
   .eval-panel {
