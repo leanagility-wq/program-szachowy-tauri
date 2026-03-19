@@ -11,6 +11,8 @@ Ten projekt jest blisko gotowości do publikacji, ale przed wrzuceniem do sklepu
 - Build Android `AAB` jest przygotowany pod wariant telefonu:
   - `npm run android:aab:stockfish:phone`
 - Wariant telefonu i emulatora różnią się tylko binarką Stockfisha.
+- Publiczne repo projektu:
+  - `https://github.com/leanagility-wq/program-szachowy-tauri`
 
 ## Co jeszcze trzeba zrobić przed publikacją
 
@@ -32,6 +34,10 @@ Ten projekt jest blisko gotowości do publikacji, ale przed wrzuceniem do sklepu
 10. Sprawdzić zgodność z 16 KB page size dla natywnych bibliotek.
 
 ## Rekomendowane ustawienia deklaracji w Play Console
+
+### Kategoria
+
+- `Edukacja`
 
 ### App access
 
@@ -60,11 +66,53 @@ Dla obecnej funkcji aplikacji najbardziej prawdopodobny wynik to niski rating og
 
 ## Materiały przygotowane w repo
 
-- Opisy sklepu PL: [store-listing.pl.md](/C:/Users/slowo/Documents/program-szachowy-tauri/docs/store-listing.pl.md)
-- Opisy sklepu EN: [store-listing.en.md](/C:/Users/slowo/Documents/program-szachowy-tauri/docs/store-listing.en.md)
-- Polityka prywatności PL: [privacy-policy.pl.md](/C:/Users/slowo/Documents/program-szachowy-tauri/docs/privacy-policy.pl.md)
-- Polityka prywatności EN: [privacy-policy.en.md](/C:/Users/slowo/Documents/program-szachowy-tauri/docs/privacy-policy.en.md)
-- Notatka o licencji Stockfisha: [stockfish-license.md](/C:/Users/slowo/Documents/program-szachowy-tauri/docs/stockfish-license.md)
+- Opisy sklepu PL:
+  - [store-listing.pl.md](docs/store-listing.pl.md)
+- Opisy sklepu EN:
+  - [store-listing.en.md](docs/store-listing.en.md)
+- Polityka prywatności PL:
+  - [privacy-policy.pl.md](docs/privacy-policy.pl.md)
+- Polityka prywatności EN:
+  - [privacy-policy.en.md](docs/privacy-policy.en.md)
+- Notatka o licencji Stockfisha:
+  - [stockfish-license.md](docs/stockfish-license.md)
+- Notice open source PL:
+  - [open-source-notice.pl.md](docs/open-source-notice.pl.md)
+- Notice open source EN:
+  - [open-source-notice.en.md](docs/open-source-notice.en.md)
+
+## Linki publiczne, które możesz już wykorzystać
+
+- repozytorium aplikacji:
+  - `https://github.com/leanagility-wq/program-szachowy-tauri`
+- README projektu:
+  - `https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/README.md`
+- licencja i źródła projektu:
+  - `https://github.com/leanagility-wq/program-szachowy-tauri/blob/main/docs/stockfish-license.md`
+- kod źródłowy Stockfisha:
+  - `https://github.com/official-stockfish/Stockfish`
+- tekst licencji Stockfisha:
+  - `https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt`
+
+## Rekomendowane pola w Play Console
+
+- `App category`:
+  - `Edukacja`
+- `Developer email`:
+  - `fin@o2.pl`
+- `Developer website`:
+  - najlepiej repo projektu:
+    - `https://github.com/leanagility-wq/program-szachowy-tauri`
+- `Privacy policy URL`:
+  - użyj osobnej strony z polityką prywatności, nawet jeśli nie jest stroną główną produktu
+
+## Uwagi praktyczne
+
+- GitHub repo może być użyte jako `Developer website`, jeśli nie masz osobnej strony projektu.
+- Link do polityki prywatności powinien nadal prowadzić bezpośrednio do strony z polityką prywatności, a nie do repo albo pliku licencyjnego.
+- Jeśli później stworzysz osobną stronę produktu, warto rozdzielić:
+  - `Developer website` -> strona projektu
+  - `Privacy policy URL` -> strona polityki prywatności
 
 ## Krótka instrukcja publikacji
 
