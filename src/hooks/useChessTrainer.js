@@ -28,6 +28,7 @@ export function useChessTrainer() {
   const openingMoveTimeoutRef = useRef(null);
   const openingTrainingRef = useRef(null);
   const postMoveUiTimeoutsRef = useRef(new Set());
+  const captureAnimationStartTimeoutRef = useRef(null);
   const captureAnimationTimeoutRef = useRef(null);
   const clearAllAsyncWorkRef = useRef(() => {});
   const hasHydratedSessionRef = useRef(true);
@@ -137,6 +138,11 @@ export function useChessTrainer() {
   }, []);
 
   const clearCaptureAnimationSquare = useCallback(() => {
+    if (captureAnimationStartTimeoutRef.current) {
+      clearTimeout(captureAnimationStartTimeoutRef.current);
+      captureAnimationStartTimeoutRef.current = null;
+    }
+
     if (captureAnimationTimeoutRef.current) {
       clearTimeout(captureAnimationTimeoutRef.current);
       captureAnimationTimeoutRef.current = null;
@@ -150,15 +156,25 @@ export function useChessTrainer() {
       return;
     }
 
-    if (captureAnimationTimeoutRef.current) {
-      clearTimeout(captureAnimationTimeoutRef.current);
+    if (captureAnimationStartTimeoutRef.current) {
+      clearTimeout(captureAnimationStartTimeoutRef.current);
+      captureAnimationStartTimeoutRef.current = null;
     }
 
-    setCaptureAnimationSquare(square);
-    captureAnimationTimeoutRef.current = window.setTimeout(() => {
+    if (captureAnimationTimeoutRef.current) {
+      clearTimeout(captureAnimationTimeoutRef.current);
       captureAnimationTimeoutRef.current = null;
-      setCaptureAnimationSquare("");
-    }, 170);
+    }
+
+    captureAnimationStartTimeoutRef.current = window.setTimeout(() => {
+      captureAnimationStartTimeoutRef.current = null;
+      setCaptureAnimationSquare(square);
+
+      captureAnimationTimeoutRef.current = window.setTimeout(() => {
+        captureAnimationTimeoutRef.current = null;
+        setCaptureAnimationSquare("");
+      }, 145);
+    }, 45);
   }, [runtimePlatform]);
 
   const scheduleAfterBoardAnimation = useCallback((callback, delayMs) => {
