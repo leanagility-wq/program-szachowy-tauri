@@ -1,8 +1,7 @@
 {
   "bundle": {
     "resources": [
-      "resources/db/openings.db",
-      "resources/engines/android"
+      "resources/db/openings.db"
     ]
   }
 }

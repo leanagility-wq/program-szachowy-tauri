@@ -29,6 +29,9 @@ src-tauri/gen/android/build/
 src-tauri/gen/android/**/build/
 src-tauri/gen/android/local.properties
 src-tauri/gen/android/**/.cxx/
+src-tauri/gen/android/app/src/main/assets/resources/engines/
+src-tauri/android-jniLibs/**/libstockfish.so
+src-tauri/resources/engines/android/*/stockfish
 *.apk
 *.aab
 

@@ -15,6 +15,7 @@ $targetBinary = Join-Path $variantDir "libstockfish.so"
 $outputDir = Join-Path $repoRoot "build\android-stockfish-variants"
 $builtApk = Join-Path $srcTauri "gen\android\app\build\outputs\apk\universal\debug\app-universal-debug.apk"
 $namedApk = Join-Path $outputDir "app-universal-debug-stockfish-$Variant.apk"
+$generatedEngineAssets = Join-Path $srcTauri "gen\android\app\src\main\assets\resources\engines"
 
 if (-not (Test-Path $sourceBinary)) {
     throw "Nie znaleziono binarki Stockfish dla wariantu '$Variant': $sourceBinary"
@@ -26,6 +27,10 @@ New-Item -ItemType Directory -Force $outputDir | Out-Null
 # Ensure the APK differs only by the selected Stockfish binary.
 Get-ChildItem -Path $jniLibsRoot -Recurse -Filter libstockfish.so -ErrorAction SilentlyContinue |
     Remove-Item -Force
+
+if (Test-Path $generatedEngineAssets) {
+    Remove-Item -Recurse -Force $generatedEngineAssets
+}
 
 Copy-Item $sourceBinary $targetBinary -Force
 
