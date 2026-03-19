@@ -483,11 +483,11 @@ input {
 
 @media (max-width: 768px) {
   .app-shell {
-    padding: 10px 8px 92px;
+    padding: 8px 8px 92px;
   }
 
   .app-topbar {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
   .language-switcher {
@@ -500,12 +500,12 @@ input {
   }
 
   .board-panel {
-    padding: 12px;
+    padding: 10px;
   }
 
   .app-title {
-    font-size: 20px;
-    margin-bottom: 12px;
+    font-size: 18px;
+    margin-bottom: 8px;
   }
 
   .toolbar-grid,

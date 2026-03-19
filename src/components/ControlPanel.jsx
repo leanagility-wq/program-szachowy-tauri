@@ -41,6 +41,7 @@ function ControlPanel({
 
   function handleOpeningChange(nextOpeningId) {
     setSelectedOpeningId(nextOpeningId);
+    setIsOpeningChooserVisible(false);
     onLoadOpening(nextOpeningId);
   }
 
@@ -174,14 +175,28 @@ function ControlPanel({
               <div className="button-row button-row-mobile-primary button-row-mobile-training">
                 <button
                   className="app-button primary"
-                  onClick={() => setIsOpeningChooserVisible((value) => !value)}
+                  onClick={() => {
+                    if (isOpeningChooserVisible) {
+                      setIsOpeningChooserVisible(false);
+                      onLoadOpening(selectedOpeningId);
+                      return;
+                    }
+
+                    setIsOpeningChooserVisible(true);
+                  }}
                 >
                   {t("control.trainOpening")}
                 </button>
               </div>
 
               <div className="button-row button-row-mobile-secondary button-row-mobile-training-secondary">
-                <button className="app-button" onClick={onStartFreeTraining}>
+                <button
+                  className="app-button"
+                  onClick={() => {
+                    setIsOpeningChooserVisible(false);
+                    onStartFreeTraining();
+                  }}
+                >
                   {t("control.freeTraining")}
                 </button>
 

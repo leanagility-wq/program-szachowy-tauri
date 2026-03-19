@@ -6,11 +6,11 @@ Chess Opening Trainer
 
 ## Short description
 
-Train chess openings and continue the game with Stockfish.
+Train basic chess openings and continue the game with Stockfish.
 
 ## Full description
 
-Chess Opening Trainer helps you practice chess openings in a fast and mobile-friendly way.
+Chess Opening Trainer helps beginners practice basic chess openings in a fast and mobile-friendly way.
 
 The app lets you:
 

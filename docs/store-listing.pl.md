@@ -6,11 +6,11 @@ Trener Szachowy
 
 ## Krótki opis
 
-Trenuj otwarcia szachowe i graj dalej ze Stockfishem.
+Trenuj podstawowe otwarcia szachowe i graj dalej ze Stockfishem.
 
 ## Pełny opis
 
-Trener Szachowy pomaga ćwiczyć otwarcia w wygodnej, mobilnej formie.
+Trener Szachowy pomaga początkującym graczom ćwiczyć podstawowe otwarcia w wygodnej, mobilnej formie.
 
 Aplikacja pozwala:
 

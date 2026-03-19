@@ -56,5 +56,5 @@ Jeśli w przyszłości aplikacja zacznie zbierać dane, korzystać z analityki, 
 
 Przed publikacją podmień tę sekcję na prawdziwe dane kontaktowe:
 
-- e-mail: `TU_WPISZ_EMAIL`
+- e-mail: fin@o2.pl
 - strona: `TU_WPISZ_URL_POLITYKI`
