@@ -13,6 +13,8 @@ dist-ssr
 *.local
 lc0_stdout.txt
 lc0_stderr.txt
+android-stockfish-debug.txt
+logi_android.txt
 
 # Project backups
 public_backup

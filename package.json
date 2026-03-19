@@ -12,7 +12,9 @@
     "android:init": "tauri android init --ci",
     "android:dev": "tauri android dev",
     "android:apk": "tauri android build --apk",
-    "android:aab": "tauri android build --aab"
+    "android:aab": "tauri android build --aab",
+    "android:apk:stockfish:arm64": "powershell -ExecutionPolicy Bypass -File scripts/build-android-stockfish-variant.ps1 -Variant arm64-v8a",
+    "android:apk:stockfish:x86_64": "powershell -ExecutionPolicy Bypass -File scripts/build-android-stockfish-variant.ps1 -Variant x86_64"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",
