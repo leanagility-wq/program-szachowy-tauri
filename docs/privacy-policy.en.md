@@ -39,6 +39,11 @@ In its current version, the app:
 ## 4. Chess engine
 
 The app uses the local Stockfish chess engine running on the user's device. Position analysis and engine moves are processed locally.
+Chess engine: Stockfish
+License: GPL-3.0
+Source code: https://github.com/official-stockfish/Stockfish
+License link:
+https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
 
 ## 5. Permissions and internet access
 
@@ -56,5 +61,5 @@ If future versions begin to collect data, use analytics, crash reporting, or ext
 
 Before publishing, replace this section with your real contact details:
 
-- email: `YOUR_EMAIL_HERE`
-- website: `YOUR_PRIVACY_POLICY_URL_HERE`
+- email: fin@o2.pl
+- website: https://pawelslowikowski.pl/chess-opening-trainer-privacy-policy/

@@ -31,4 +31,6 @@ Najważniejsze funkcje:
 
 Aplikacja została zaprojektowana z myślą o wygodnym treningu na telefonie, ale zachowuje też desktopowy charakter projektu źródłowego.
 
-Silnik Stockfish jest używany zgodnie z jego licencją GPL-3.0. Szczegóły znajdują się w materiałach prawnych i źródłach projektu.
+Aplikacja korzysta z lokalnego silnika szachowego Stockfish uruchamianego na urządzeniu użytkownika. Analiza pozycji i ruchy silnika są wykonywane lokalnie.
+Silnik szachowy: Stockfish
+Licencja: GPL-3.0

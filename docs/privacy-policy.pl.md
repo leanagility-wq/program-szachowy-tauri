@@ -39,6 +39,11 @@ W obecnej wersji aplikacja:
 ## 4. Silnik szachowy
 
 Aplikacja korzysta z lokalnego silnika szachowego Stockfish uruchamianego na urządzeniu użytkownika. Analiza pozycji i ruchy silnika są wykonywane lokalnie.
+Silnik szachowy: Stockfish
+Licencja: GPL-3.0
+Kod źródłowy: https://github.com/official-stockfish/Stockfish
+Link do licencji:
+https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt
 
 ## 5. Uprawnienia i połączenie z internetem
 
@@ -57,4 +62,4 @@ Jeśli w przyszłości aplikacja zacznie zbierać dane, korzystać z analityki, 
 Przed publikacją podmień tę sekcję na prawdziwe dane kontaktowe:
 
 - e-mail: fin@o2.pl
-- strona: `TU_WPISZ_URL_POLITYKI`
+- strona: https://pawelslowikowski.pl/trener-otwarc-szachowy-polityka-prywatnosci/

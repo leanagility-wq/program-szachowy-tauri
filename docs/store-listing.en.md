@@ -31,4 +31,6 @@ Key features:
 
 The app is designed for comfortable phone-based training while keeping the same core project architecture used on desktop.
 
-Stockfish is included under its GPL-3.0 license. See the project legal materials and source distribution details for more information.
+The app uses the local Stockfish chess engine running on the user's device. Position analysis and engine moves are processed locally.
+Chess engine: Stockfish
+License: GPL-3.0
