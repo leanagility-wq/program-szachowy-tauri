@@ -286,6 +286,15 @@ input {
   line-height: 1.45;
 }
 
+.about-card-meta,
+.about-card-link {
+  margin: 8px 0 0;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
 .app-select {
   width: 100%;
   min-height: 42px;
@@ -560,6 +569,11 @@ input {
 
   .about-card-text {
     font-size: 11px;
+  }
+
+  .about-card-meta,
+  .about-card-link {
+    font-size: 10px;
   }
 
   .app-button {

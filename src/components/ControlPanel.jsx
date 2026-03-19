@@ -93,6 +93,8 @@ function ControlPanel({
       <div className="about-card">
         <div className="about-card-title">{t("about.title")}</div>
         <p className="about-card-text">{t("about.summary")}</p>
+        <p className="about-card-meta">{t("about.license")}</p>
+        <p className="about-card-link">{t("about.projectUrl")}</p>
       </div>
 
       {!isMobileLayout ? (

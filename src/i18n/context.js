@@ -38,6 +38,8 @@ export const messages = {
     "about.title": "O aplikacji",
     "about.summary":
       "Trener Szachowy pomaga ćwiczyć podstawowe otwarcia i grać dalej z lokalnym silnikiem Stockfish na desktopie oraz Androidzie.",
+    "about.license": "Silnik: Stockfish, licencja GPL-3.0",
+    "about.projectUrl": "Kod źródłowy: github.com/leanagility-wq/program-szachowy-tauri",
     "session.trainingOpening": "Trening otwarcia",
     "session.trainingFree": "Trening bez szablonu",
     "session.playContinue": "Gra dalej",
@@ -157,6 +159,8 @@ export const messages = {
     "about.title": "About",
     "about.summary":
       "Chess Opening Trainer helps you practice basic openings and continue the game with the local Stockfish engine on desktop and Android.",
+    "about.license": "Engine: Stockfish, license GPL-3.0",
+    "about.projectUrl": "Source code: github.com/leanagility-wq/program-szachowy-tauri",
     "session.trainingOpening": "Opening training",
     "session.trainingFree": "Free opening training",
     "session.playContinue": "Play on",
