@@ -240,10 +240,12 @@ export function useChessTrainer() {
   });
 
   const freeOpeningTraining = useFreeOpeningTraining({
+    mode,
     filteredOpenings,
     playerColor,
     gameRef,
-    fen
+    fen,
+    scheduleAfterBoardAnimation
   });
 
   const {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { fetchOpeningById, fetchOpeningMoveAnalysis } from "../services/api";
 import { useI18n } from "../i18n";
 
@@ -44,24 +44,41 @@ function getScoreState(scoreEntries) {
 }
 
 export function useFreeOpeningTraining({
+  mode,
   filteredOpenings,
   playerColor,
   gameRef,
-  fen
+  fen,
+  scheduleAfterBoardAnimation
 }) {
   const { t } = useI18n();
   const [openingCatalog, setOpeningCatalog] = useState([]);
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
   const [scoreEntries, setScoreEntries] = useState([]);
   const [bookMoveSquare, setBookMoveSquare] = useState("");
+  const lastCatalogSignatureRef = useRef("");
+
+  const catalogSignature = useMemo(
+    () => filteredOpenings.map((opening) => opening.id).join("|"),
+    [filteredOpenings]
+  );
 
   useEffect(() => {
     let isCancelled = false;
 
     async function loadCatalog() {
+      if (mode !== "free") {
+        return;
+      }
+
       if (filteredOpenings.length === 0) {
         setOpeningCatalog([]);
         setIsLoadingCatalog(false);
+        lastCatalogSignatureRef.current = "";
+        return;
+      }
+
+      if (catalogSignature === lastCatalogSignatureRef.current && openingCatalog.length > 0) {
         return;
       }
 
@@ -77,6 +94,7 @@ export function useFreeOpeningTraining({
         }
 
         setOpeningCatalog(detailedOpenings);
+        lastCatalogSignatureRef.current = catalogSignature;
       } catch (error) {
         if (isCancelled) {
           return;
@@ -84,6 +102,7 @@ export function useFreeOpeningTraining({
 
         console.error(t("free.fetchCatalogError"), error);
         setOpeningCatalog([]);
+        lastCatalogSignatureRef.current = "";
       } finally {
         if (!isCancelled) {
           setIsLoadingCatalog(false);
@@ -96,20 +115,35 @@ export function useFreeOpeningTraining({
     return () => {
       isCancelled = true;
     };
-  }, [filteredOpenings, t]);
+  }, [catalogSignature, filteredOpenings, mode, openingCatalog.length, t]);
+
+  useEffect(() => {
+    if (mode !== "free") {
+      setBookMoveSquare("");
+    }
+  }, [mode]);
 
   const openingLabel = useMemo(() => {
+    if (mode !== "free") {
+      return "";
+    }
+
     const history = fen ? gameRef.current.history() : [];
     const matchingOpenings = openingCatalog.filter((opening) =>
       history.every((move, index) => opening.moves[index] === move)
     );
 
     return getOpeningLabel(t, matchingOpenings, history.length, isLoadingCatalog);
-  }, [fen, gameRef, isLoadingCatalog, openingCatalog, t]);
+  }, [fen, gameRef, isLoadingCatalog, mode, openingCatalog, t]);
 
   const analyzePlayerMove = useCallback(
     async ({ fenBeforeMove, move, historyAfterMove }) => {
-      if (scoreEntries.length >= MAX_SCORING_MOVES || !move?.from || !move?.to) {
+      if (
+        mode !== "free" ||
+        scoreEntries.length >= MAX_SCORING_MOVES ||
+        !move?.from ||
+        !move?.to
+      ) {
         return;
       }
 
@@ -124,36 +158,38 @@ export function useFreeOpeningTraining({
 
       const playedMove = `${move.from}${move.to}${move.promotion || ""}`;
 
-      try {
-        const data = await fetchOpeningMoveAnalysis(
-          fenBeforeMove,
-          playedMove,
-          playerColor
-        );
+      scheduleAfterBoardAnimation(async () => {
+        try {
+          const data = await fetchOpeningMoveAnalysis(
+            fenBeforeMove,
+            playedMove,
+            playerColor
+          );
 
-        setScoreEntries((previousEntries) => {
-          if (previousEntries.length >= MAX_SCORING_MOVES) {
-            return previousEntries;
-          }
-
-          return [
-            ...previousEntries,
-            {
-              moveNumber: previousEntries.length + 1,
-              score: data.score ?? 0,
-              category: isBookMove
-                ? "book"
-                : (data.score ?? 0) >= 75
-                  ? "good"
-                  : "weak"
+          setScoreEntries((previousEntries) => {
+            if (previousEntries.length >= MAX_SCORING_MOVES) {
+              return previousEntries;
             }
-          ];
-        });
-      } catch (error) {
-        console.error(t("free.analyzeMoveError"), error);
-      }
+
+            return [
+              ...previousEntries,
+              {
+                moveNumber: previousEntries.length + 1,
+                score: data.score ?? 0,
+                category: isBookMove
+                  ? "book"
+                  : (data.score ?? 0) >= 75
+                    ? "good"
+                    : "weak"
+              }
+            ];
+          });
+        } catch (error) {
+          console.error(t("free.analyzeMoveError"), error);
+        }
+      });
     },
-    [openingCatalog, playerColor, scoreEntries.length, t]
+    [mode, openingCatalog, playerColor, scheduleAfterBoardAnimation, scoreEntries.length, t]
   );
 
   const resetAnalysis = useCallback(() => {
