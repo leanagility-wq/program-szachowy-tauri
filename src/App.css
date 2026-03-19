@@ -297,6 +297,20 @@ input {
   padding-top: 10px;
 }
 
+.button-row-mobile-training {
+  grid-template-columns: 1fr;
+  margin-bottom: 10px;
+}
+
+.button-row-mobile-training-secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.button-row-mobile-options {
+  grid-template-columns: 1fr;
+  margin-bottom: 0;
+}
+
 .app-button {
   width: 100%;
   min-height: 42px;
@@ -503,6 +517,10 @@ input {
   .button-row-mobile-primary,
   .button-row-mobile-secondary {
     grid-template-columns: 1fr;
+  }
+
+  .button-row-mobile-training-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .control-label {
@@ -737,12 +755,16 @@ input {
   bottom: 0;
   z-index: 20;
   display: none;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
   background: rgba(11, 17, 32, 0.94);
   border-top: 1px solid rgba(148, 163, 184, 0.16);
   backdrop-filter: blur(18px);
+}
+
+.mobile-options-panel {
+  padding: 14px 12px;
 }
 
 .mobile-tabbar-button {

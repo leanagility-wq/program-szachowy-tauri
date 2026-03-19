@@ -25,13 +25,24 @@ function ControlPanel({
   mode,
   isEngineThinking,
   isEngineMoveScheduled,
-  isMobileLayout
+  isMobileLayout,
+  mobileView = "main"
 }) {
   const { t } = useI18n();
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isOpeningChooserVisible, setIsOpeningChooserVisible] = useState(false);
   const runtimePlatform = getRuntimePlatform();
   const engineOptions = getEngineOptionAvailability(runtimePlatform);
   const hasEngineSupport = hasEngineSupportOnPlatform(runtimePlatform);
+  const isMobileMainView = isMobileLayout && mobileView === "main";
+  const isMobileOptionsView = isMobileLayout && mobileView === "options";
+  const shouldShowOpeningControls = !isMobileLayout || isOpeningChooserVisible;
+  const shouldShowPrimaryControls = !isMobileLayout || isMobileMainView;
+  const shouldShowAdvancedControls = !isMobileLayout || isMobileOptionsView;
+
+  function handleOpeningChange(nextOpeningId) {
+    setSelectedOpeningId(nextOpeningId);
+    onLoadOpening(nextOpeningId);
+  }
 
   const advancedControls = (
     <>
@@ -78,18 +89,12 @@ function ControlPanel({
 
       {!hasEngineSupport ? <div className="control-note">{t("control.mobileNoEngine")}</div> : null}
 
-      <div className={`button-row${isMobileLayout ? " button-row-mobile-secondary" : ""}`}>
-        <button className="app-button" onClick={onResetTraining}>
-          {t("control.reset")}
-        </button>
-
-        {!isMobileLayout ? (
+      {!isMobileLayout ? (
+        <div className="button-row">
           <button className="app-button" onClick={onRequestHint}>
             {t("control.showHint")}
           </button>
-        ) : null}
 
-        {!isMobileLayout ? (
           <button
             className="app-button danger"
             onClick={onUndoLastMovePair}
@@ -97,76 +102,99 @@ function ControlPanel({
           >
             {t("control.undoMove")}
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </>
   );
 
   return (
     <>
-      <div className={`toolbar-grid${isMobileLayout ? " toolbar-grid-mobile-main" : ""}`}>
-        <div className="control-group">
-          <label className="control-label">{t("control.opening")}</label>
-          <div className="opening-picker-row">
-            <select
-              value={selectedOpeningId}
-              onChange={(e) => setSelectedOpeningId(e.target.value)}
-              className="app-select"
-            >
-              {filteredOpenings.map((opening) => (
-                <option key={opening.id} value={opening.id}>
-                  {opening.name}
-                </option>
-              ))}
-            </select>
+      {shouldShowPrimaryControls ? (
+        <>
+          {shouldShowOpeningControls ? (
+            <div className={`toolbar-grid${isMobileLayout ? " toolbar-grid-mobile-main" : ""}`}>
+              <div className="control-group">
+                <label className="control-label">{t("control.opening")}</label>
+                <div className="opening-picker-row">
+                  <select
+                    value={selectedOpeningId}
+                    onChange={(e) => handleOpeningChange(e.target.value)}
+                    className="app-select"
+                    disabled={filteredOpenings.length === 0}
+                  >
+                    {filteredOpenings.map((opening) => (
+                      <option key={opening.id} value={opening.id}>
+                        {opening.name}
+                      </option>
+                    ))}
+                  </select>
 
-            <div className="color-toggle-group" role="group" aria-label={t("control.chooseColor")}>
-              <button
-                type="button"
-                className={`color-toggle-button color-toggle-button-light${playerColor === "white" ? " active" : ""}`}
-                onClick={() => setPlayerColor("white")}
-                aria-pressed={playerColor === "white"}
-                title={t("control.white")}
-              >
-                B
+                  <div className="color-toggle-group" role="group" aria-label={t("control.chooseColor")}>
+                    <button
+                      type="button"
+                      className={`color-toggle-button color-toggle-button-light${playerColor === "white" ? " active" : ""}`}
+                      onClick={() => setPlayerColor("white")}
+                      aria-pressed={playerColor === "white"}
+                      title={t("control.white")}
+                    >
+                      B
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`color-toggle-button color-toggle-button-dark${playerColor === "black" ? " active" : ""}`}
+                      onClick={() => setPlayerColor("black")}
+                      aria-pressed={playerColor === "black"}
+                      title={t("control.black")}
+                    >
+                      C
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {!isMobileLayout ? (
+            <div className="button-row">
+              <button className="app-button primary" onClick={() => onLoadOpening(selectedOpeningId)}>
+                {t("control.trainOpening")}
               </button>
 
-              <button
-                type="button"
-                className={`color-toggle-button color-toggle-button-dark${playerColor === "black" ? " active" : ""}`}
-                onClick={() => setPlayerColor("black")}
-                aria-pressed={playerColor === "black"}
-                title={t("control.black")}
-              >
-                C
+              <button className="app-button" onClick={onStartFreeTraining}>
+                {t("control.freeTraining")}
+              </button>
+
+              <button className="app-button" onClick={onResetTraining}>
+                {t("control.reset")}
               </button>
             </div>
-          </div>
-        </div>
-      </div>
+          ) : (
+            <>
+              <div className="button-row button-row-mobile-primary button-row-mobile-training">
+                <button
+                  className="app-button primary"
+                  onClick={() => setIsOpeningChooserVisible((value) => !value)}
+                >
+                  {t("control.trainOpening")}
+                </button>
+              </div>
 
-      <div className={`button-row${isMobileLayout ? " button-row-mobile-primary" : ""}`}>
-        <button className="app-button primary" onClick={onLoadOpening}>
-          {t("control.loadOpening")}
-        </button>
+              <div className="button-row button-row-mobile-secondary button-row-mobile-training-secondary">
+                <button className="app-button" onClick={onStartFreeTraining}>
+                  {t("control.freeTraining")}
+                </button>
 
-        <button className="app-button" onClick={onStartFreeTraining}>
-          {t("control.freeTraining")}
-        </button>
+                <button className="app-button" onClick={onResetTraining}>
+                  {t("control.reset")}
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      ) : null}
 
-        {isMobileLayout ? (
-          <button
-            type="button"
-            className="app-button mobile-options-button"
-            onClick={() => setIsOptionsOpen((value) => !value)}
-            aria-expanded={isOptionsOpen}
-          >
-            {isOptionsOpen ? t("control.hideOptions") : t("control.options")}
-          </button>
-        ) : null}
-      </div>
-
-      {!isMobileLayout || isOptionsOpen ? advancedControls : null}
+      {shouldShowAdvancedControls ? advancedControls : null}
     </>
   );
 }

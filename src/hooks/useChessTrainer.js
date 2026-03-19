@@ -555,17 +555,18 @@ export function useChessTrainer() {
     return showHint ? hint || "-" : "-";
   }, [hint, showHint]);
 
-  const loadOpening = useCallback(async () => {
-    if (!effectiveSelectedOpeningId) {
+  const loadOpening = useCallback(async (openingId = effectiveSelectedOpeningId) => {
+    if (!openingId) {
       return;
     }
 
     try {
-      const data = await fetchOpeningById(effectiveSelectedOpeningId);
+      const data = await fetchOpeningById(openingId);
       const moves = data.moves || [];
       const loadedOpeningName = data.name || t("trainer.unnamedOpening");
 
       resetSessionState();
+      setSelectedOpeningId(openingId);
       setOpeningMoves(moves);
       setOpeningName(loadedOpeningName);
 

@@ -26,7 +26,8 @@ function ChessBoardPanel({
   selectedSquare,
   captureAnimationSquare,
   chessboardOptions,
-  isMobileLayout
+  isMobileLayout,
+  mobileControlView = "full"
 }) {
   const { t } = useI18n();
   const [isEvaluationVisible, setIsEvaluationVisible] = useState(true);
@@ -135,6 +136,7 @@ function ChessBoardPanel({
         isEngineThinking={isEngineThinking}
         isEngineMoveScheduled={isEngineMoveScheduled}
         isMobileLayout={isMobileLayout}
+        mobileView={mobileControlView}
       />
 
       <div className="board-analysis-row">
