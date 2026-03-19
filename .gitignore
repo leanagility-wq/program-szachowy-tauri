@@ -33,6 +33,7 @@ src-tauri/gen/android/app/src/main/assets/resources/engines/
 src-tauri/android-jniLibs/**/libstockfish.so
 src-tauri/resources/engines/android/*/stockfish
 src-tauri/resources/engines/windows/stockfish.exe
+src-tauri/stockfish.exe
 *.apk
 *.aab
 
