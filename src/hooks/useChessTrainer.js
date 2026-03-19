@@ -152,13 +152,24 @@ export function useChessTrainer() {
     setCaptureAnimationSquare("");
   }, []);
 
-  const markCaptureAnimationSquare = useCallback((square) => {
-    if (!square || runtimePlatform !== "android") {
+  const markCaptureAnimationSquare = useCallback((sourceSquare, targetSquare) => {
+    if (!sourceSquare || !targetSquare || runtimePlatform !== "android") {
       return;
     }
 
-    const hideStartDelayMs = Math.round(boardAnimationDurationMs * 0.28);
-    const hideDurationMs = Math.round(boardAnimationDurationMs * 0.52);
+    const sourceFile = sourceSquare.charCodeAt(0);
+    const sourceRank = Number(sourceSquare[1]);
+    const targetFile = targetSquare.charCodeAt(0);
+    const targetRank = Number(targetSquare[1]);
+
+    const moveDistance = Math.max(
+      Math.abs(targetFile - sourceFile),
+      Math.abs(targetRank - sourceRank)
+    );
+    const normalizedDistance = Math.min(1, Math.max(0, (moveDistance - 1) / 6));
+    const hideStartProgress = 0.1 + normalizedDistance * 0.18;
+    const hideStartDelayMs = Math.round(boardAnimationDurationMs * hideStartProgress);
+    const hideDurationMs = Math.max(90, boardAnimationDurationMs - hideStartDelayMs + 24);
 
     if (captureAnimationStartTimeoutRef.current) {
       clearTimeout(captureAnimationStartTimeoutRef.current);
@@ -172,7 +183,7 @@ export function useChessTrainer() {
 
     captureAnimationStartTimeoutRef.current = window.setTimeout(() => {
       captureAnimationStartTimeoutRef.current = null;
-      setCaptureAnimationSquare(square);
+      setCaptureAnimationSquare(targetSquare);
 
       captureAnimationTimeoutRef.current = window.setTimeout(() => {
         captureAnimationTimeoutRef.current = null;
@@ -425,7 +436,7 @@ export function useChessTrainer() {
     }
 
     if (move.captured && !move.flags?.includes("e")) {
-      markCaptureAnimationSquare(targetSquare);
+      markCaptureAnimationSquare(sourceSquare, targetSquare);
     }
 
     clearSquareSelection();

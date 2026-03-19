@@ -134,7 +134,7 @@ export function useEnginePlay({
       }
 
       if (appliedMove.captured && !appliedMove.flags?.includes("e")) {
-        markCaptureAnimationSquare(appliedMove.to);
+        markCaptureAnimationSquare(appliedMove.from, appliedMove.to);
       }
 
       setFen(gameRef.current.fen());
