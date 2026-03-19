@@ -25,6 +25,19 @@ if (-not (Test-Path $sourceBinary)) {
 New-Item -ItemType Directory -Force $variantDir | Out-Null
 New-Item -ItemType Directory -Force $outputDir | Out-Null
 
+$staleArtifacts = @(
+    (Join-Path $outputDir "app-debug-stockfish-$Variant.apk"),
+    (Join-Path $outputDir "app-universal-debug-stockfish-$Variant.apk"),
+    (Join-Path $outputDir "app-release-stockfish-$Variant.aab"),
+    (Join-Path $outputDir "app-universal-release-stockfish-$Variant.aab")
+)
+
+foreach ($artifactPath in $staleArtifacts) {
+    if (Test-Path $artifactPath) {
+        Remove-Item -Force $artifactPath
+    }
+}
+
 # Ensure the APK differs only by the selected Stockfish binary.
 Get-ChildItem -Path $jniLibsRoot -Recurse -Filter libstockfish.so -ErrorAction SilentlyContinue |
     Remove-Item -Force
@@ -68,11 +81,30 @@ try {
     }
 
     $extension = if ($Artifact -eq "apk") { "apk" } else { "aab" }
-    $artifactFlavor = if ($Artifact -eq "apk") { "debug" } else { "release" }
-    $namedArtifact = Join-Path $outputDir "app-$artifactFlavor-stockfish-$Variant.$extension"
+    $canonicalName =
+        if ($Artifact -eq "apk") {
+            "app-debug-stockfish-$Variant.$extension"
+        }
+        else {
+            "app-release-stockfish-$Variant.$extension"
+        }
 
-    Copy-Item $builtArtifact.FullName $namedArtifact -Force
-    Write-Host "Gotowy artefakt: $namedArtifact"
+    $canonicalArtifact = Join-Path $outputDir $canonicalName
+
+    Copy-Item $builtArtifact.FullName $canonicalArtifact -Force
+
+    if ($Artifact -eq "apk") {
+        $legacyArtifact = Join-Path $outputDir "app-universal-debug-stockfish-$Variant.$extension"
+        Copy-Item $builtArtifact.FullName $legacyArtifact -Force
+        Write-Host "Gotowy artefakt: $canonicalArtifact"
+        Write-Host "Alias zgodny ze starym nazewnictwem: $legacyArtifact"
+    }
+    else {
+        $legacyArtifact = Join-Path $outputDir "app-universal-release-stockfish-$Variant.$extension"
+        Copy-Item $builtArtifact.FullName $legacyArtifact -Force
+        Write-Host "Gotowy artefakt: $canonicalArtifact"
+        Write-Host "Alias zgodny ze starym nazewnictwem: $legacyArtifact"
+    }
 }
 finally {
     Pop-Location
