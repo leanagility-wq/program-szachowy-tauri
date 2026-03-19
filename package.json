@@ -15,8 +15,12 @@
     "android:aab": "tauri android build --aab",
     "android:apk:stockfish:arm64": "powershell -ExecutionPolicy Bypass -File scripts/build-android-stockfish-variant.ps1 -Variant arm64-v8a",
     "android:apk:stockfish:x86_64": "powershell -ExecutionPolicy Bypass -File scripts/build-android-stockfish-variant.ps1 -Variant x86_64",
+    "android:aab:stockfish:arm64": "powershell -ExecutionPolicy Bypass -File scripts/build-android-stockfish-variant.ps1 -Variant arm64-v8a -Artifact aab",
+    "android:aab:stockfish:x86_64": "powershell -ExecutionPolicy Bypass -File scripts/build-android-stockfish-variant.ps1 -Variant x86_64 -Artifact aab",
     "android:apk:stockfish:phone": "npm run android:apk:stockfish:arm64",
-    "android:apk:stockfish:emulator": "npm run android:apk:stockfish:x86_64"
+    "android:apk:stockfish:emulator": "npm run android:apk:stockfish:x86_64",
+    "android:aab:stockfish:phone": "npm run android:aab:stockfish:arm64",
+    "android:aab:stockfish:emulator": "npm run android:aab:stockfish:x86_64"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",

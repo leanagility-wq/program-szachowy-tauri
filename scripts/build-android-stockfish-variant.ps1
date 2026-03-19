@@ -1,7 +1,10 @@
 param(
     [Parameter(Mandatory = $true)]
     [ValidateSet("arm64-v8a", "x86_64")]
-    [string]$Variant
+    [string]$Variant,
+
+    [ValidateSet("apk", "aab")]
+    [string]$Artifact = "apk"
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,8 +16,6 @@ $jniLibsRoot = Join-Path $srcTauri "android-jniLibs"
 $variantDir = Join-Path $jniLibsRoot $Variant
 $targetBinary = Join-Path $variantDir "libstockfish.so"
 $outputDir = Join-Path $repoRoot "build\android-stockfish-variants"
-$builtApk = Join-Path $srcTauri "gen\android\app\build\outputs\apk\universal\debug\app-universal-debug.apk"
-$namedApk = Join-Path $outputDir "app-universal-debug-stockfish-$Variant.apk"
 $generatedEngineAssets = Join-Path $srcTauri "gen\android\app\src\main\assets\resources\engines"
 
 if (-not (Test-Path $sourceBinary)) {
@@ -35,21 +36,43 @@ if (Test-Path $generatedEngineAssets) {
 Copy-Item $sourceBinary $targetBinary -Force
 
 Write-Host "Przygotowano wariant Stockfish: $Variant"
+Write-Host "Artefakt: $Artifact"
 Write-Host "Binarka: $targetBinary"
 
 Push-Location $repoRoot
 try {
-    npm.cmd run android:apk -- --debug
+    if ($Artifact -eq "apk") {
+        npm.cmd run android:apk -- --debug
+    }
+    else {
+        npm.cmd run android:aab
+    }
+
     if ($LASTEXITCODE -ne 0) {
-        throw "Budowanie Android APK nie powiodlo sie. Kod wyjscia: $LASTEXITCODE"
+        throw "Budowanie Android $Artifact nie powiodlo sie. Kod wyjscia: $LASTEXITCODE"
     }
 
-    if (-not (Test-Path $builtApk)) {
-        throw "Nie znaleziono zbudowanego APK: $builtApk"
+    $builtArtifact = if ($Artifact -eq "apk") {
+        Get-ChildItem -Path (Join-Path $srcTauri "gen\android\app\build\outputs\apk") -Recurse -Filter *.apk |
+            Sort-Object LastWriteTimeUtc -Descending |
+            Select-Object -First 1
+    }
+    else {
+        Get-ChildItem -Path (Join-Path $srcTauri "gen\android\app\build\outputs\bundle") -Recurse -Filter *.aab |
+            Sort-Object LastWriteTimeUtc -Descending |
+            Select-Object -First 1
     }
 
-    Copy-Item $builtApk $namedApk -Force
-    Write-Host "Gotowy APK: $namedApk"
+    if (-not $builtArtifact) {
+        throw "Nie znaleziono zbudowanego artefaktu Android dla typu '$Artifact'."
+    }
+
+    $extension = if ($Artifact -eq "apk") { "apk" } else { "aab" }
+    $artifactFlavor = if ($Artifact -eq "apk") { "debug" } else { "release" }
+    $namedArtifact = Join-Path $outputDir "app-$artifactFlavor-stockfish-$Variant.$extension"
+
+    Copy-Item $builtArtifact.FullName $namedArtifact -Force
+    Write-Host "Gotowy artefakt: $namedArtifact"
 }
 finally {
     Pop-Location
