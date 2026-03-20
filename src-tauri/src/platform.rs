@@ -119,6 +119,7 @@ pub fn get_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
             app,
             &[
                 &["resources", "engines", "windows", "stockfish.exe"],
+                &["engines", "windows", "stockfish.exe"],
                 &["stockfish.exe"],
             ],
         );
@@ -140,7 +141,11 @@ pub fn get_lc0_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 
     find_existing_path(
         app,
-        &[&["resources", "engines", "windows", "lc0.exe"], &["lc0.exe"]],
+        &[
+            &["resources", "engines", "windows", "lc0.exe"],
+            &["engines", "windows", "lc0.exe"],
+            &["lc0.exe"],
+        ],
     )
 }
 
@@ -153,6 +158,7 @@ pub fn get_maia_weights_path(app: &tauri::AppHandle) -> Result<PathBuf, String> 
         app,
         &[
             &["resources", "engines", "windows", "maia.pb.gz"],
+            &["engines", "windows", "maia.pb.gz"],
             &["maia.pb.gz"],
         ],
     )
