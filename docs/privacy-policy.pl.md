@@ -62,4 +62,4 @@ Jeśli w przyszłości aplikacja zacznie zbierać dane, korzystać z analityki, 
 ## 8. Kontakt
 
 - e-mail: fin@o2.pl
-- strona: https://pawelslowikowski.pl/trener-otwarc-szachowy-polityka-prywatnosci/
+- strona: https://pawelslowikowski.pl/trener-otwarc-szachowy-polityka-prywatnosci
