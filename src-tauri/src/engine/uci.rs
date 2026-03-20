@@ -4,6 +4,9 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::mpsc::{self, Receiver};
 use std::time::Duration;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 use crate::chess_logic::normalize_evaluation_for_white;
 use crate::models::Evaluation;
 
@@ -43,6 +46,9 @@ impl UciProcess {
         if let Some(parent_dir) = config.binary_path.parent() {
             command.current_dir(parent_dir);
         }
+
+        #[cfg(target_os = "windows")]
+        command.creation_flags(0x08000000);
 
         log_uci(
             config.binary_label,

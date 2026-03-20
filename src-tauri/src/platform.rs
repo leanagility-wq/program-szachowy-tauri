@@ -69,6 +69,75 @@ fn ensure_parent_dir(path: &PathBuf, label: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn ensure_file_copied(source_path: &PathBuf, target_path: &PathBuf, label: &str) -> Result<(), String> {
+    let should_copy = match (fs::metadata(source_path), fs::metadata(target_path)) {
+        (Ok(source_metadata), Ok(target_metadata)) => {
+            source_metadata.len() != target_metadata.len()
+        }
+        (Ok(_), Err(_)) => true,
+        (Err(error), _) => {
+            return Err(format!(
+                "Nie udało się odczytać źródła {label} {}: {error}",
+                source_path.display()
+            ));
+        }
+    };
+
+    if !should_copy {
+        return Ok(());
+    }
+
+    ensure_parent_dir(target_path, label)?;
+    fs::copy(source_path, target_path).map_err(|error| {
+        format!(
+            "Nie udało się skopiować {label} z {} do {}: {error}",
+            source_path.display(),
+            target_path.display()
+        )
+    })?;
+
+    log_platform(&format!(
+        "copied {label} from {} to {}",
+        source_path.display(),
+        target_path.display()
+    ));
+
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn prepare_windows_engine_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let mut target_dir = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|error| format!("Nie udało się odczytać katalogu danych aplikacji: {error}"))?;
+    target_dir = target_dir.join("engines").join("windows");
+
+    let files = [
+        "stockfish.exe",
+        "lc0.exe",
+        "maia.pb.gz",
+        "libopenblas.dll",
+        "mimalloc-override.dll",
+        "mimalloc-redirect.dll",
+    ];
+
+    for file_name in files {
+        let source_path = find_existing_path(
+            app,
+            &[
+                &["resources", "engines", "windows", file_name],
+                &["engines", "windows", file_name],
+                &[file_name],
+            ],
+        )?;
+        let target_path = target_dir.join(file_name);
+        ensure_file_copied(&source_path, &target_path, file_name)?;
+    }
+
+    Ok(target_dir)
+}
+
 pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let mut writable_path = app
         .path()
@@ -115,14 +184,7 @@ pub fn get_database_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 pub fn get_stockfish_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     #[cfg(target_os = "windows")]
     {
-        return find_existing_path(
-            app,
-            &[
-                &["resources", "engines", "windows", "stockfish.exe"],
-                &["engines", "windows", "stockfish.exe"],
-                &["stockfish.exe"],
-            ],
-        );
+        return Ok(prepare_windows_engine_dir(app)?.join("stockfish.exe"));
     }
 
     #[cfg(target_os = "android")]
@@ -139,14 +201,7 @@ pub fn get_lc0_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
         return Err("Silnik Maia jest dostępny tylko na desktopie Windows.".to_string());
     }
 
-    find_existing_path(
-        app,
-        &[
-            &["resources", "engines", "windows", "lc0.exe"],
-            &["engines", "windows", "lc0.exe"],
-            &["lc0.exe"],
-        ],
-    )
+    Ok(prepare_windows_engine_dir(app)?.join("lc0.exe"))
 }
 
 pub fn get_maia_weights_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -154,14 +209,7 @@ pub fn get_maia_weights_path(app: &tauri::AppHandle) -> Result<PathBuf, String> 
         return Err("Silnik Maia jest dostępny tylko na desktopie Windows.".to_string());
     }
 
-    find_existing_path(
-        app,
-        &[
-            &["resources", "engines", "windows", "maia.pb.gz"],
-            &["engines", "windows", "maia.pb.gz"],
-            &["maia.pb.gz"],
-        ],
-    )
+    Ok(prepare_windows_engine_dir(app)?.join("maia.pb.gz"))
 }
 
 #[cfg(target_os = "android")]
