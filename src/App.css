@@ -343,6 +343,10 @@ input {
   margin-bottom: 10px;
 }
 
+.button-row-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .button-row-mobile-primary {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

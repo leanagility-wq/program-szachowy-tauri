@@ -30,6 +30,7 @@ function ControlPanel({
 }) {
   const { t } = useI18n();
   const [isOpeningChooserVisible, setIsOpeningChooserVisible] = useState(false);
+  const [isDesktopAboutVisible, setIsDesktopAboutVisible] = useState(false);
   const runtimePlatform = getRuntimePlatform();
   const engineOptions = getEngineOptionAvailability(runtimePlatform);
   const hasEngineSupport = hasEngineSupportOnPlatform(runtimePlatform);
@@ -90,12 +91,26 @@ function ControlPanel({
 
       {!hasEngineSupport ? <div className="control-note">{t("control.mobileNoEngine")}</div> : null}
 
-      <div className="about-card">
-        <div className="about-card-title">{t("about.title")}</div>
-        <p className="about-card-text">{t("about.summary")}</p>
-        <p className="about-card-meta">{t("about.license")}</p>
-        <p className="about-card-link">{t("about.projectUrl")}</p>
-      </div>
+      {!isMobileLayout ? (
+        <div className="button-row button-row-single">
+          <button
+            type="button"
+            className="app-button"
+            onClick={() => setIsDesktopAboutVisible((value) => !value)}
+          >
+            {t("about.title")}
+          </button>
+        </div>
+      ) : null}
+
+      {isMobileLayout || isDesktopAboutVisible ? (
+        <div className="about-card">
+          <div className="about-card-title">{t("about.title")}</div>
+          <p className="about-card-text">{t("about.summary")}</p>
+          <p className="about-card-meta">{t("about.license")}</p>
+          <p className="about-card-link">{t("about.projectUrl")}</p>
+        </div>
+      ) : null}
 
       {!isMobileLayout ? (
         <div className="button-row">
